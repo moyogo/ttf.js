@@ -13,6 +13,7 @@ GlyfTable = require ('./table/GlyfTable')
 HheaTable = require ('./table/HheaTable')
 HmtxTable = require ('./table/HmtxTable')
 OS_2Table = require ('./table/OS_2Table')
+CmapTable = require ('./table/CmapTable')
 
 Glyph = require ('./glyph/Glyph')
 
@@ -40,6 +41,7 @@ class TrueType
     @hhea = new HheaTable()
     @hmtx = new HmtxTable()
     @OS_2 = new OS_2Table()
+    @cmap = new CmapTable()
 
   # https://developer.apple.com/fonts/TTRefMan/RM06/Chap6.html#ScalerTypeNote
   isMacTTF: () ->
@@ -146,6 +148,11 @@ class TrueType
         # OS/2
         if typeof tableOffsets['OS/2'] isnt 'undefined'
           ttf.OS_2 = OS_2Table.createFromTTFDataView(view, tableOffsets['OS/2'], ttf)
+        
+        # cmap
+        if typeof tableOffsets['cmap'] isnt 'undefined'
+          ttf.cmap = CmapTable.createFromTTFDataView(view, tableOffsets['cmap'], ttf)
+          
 
 
     # return ttf
@@ -204,6 +211,10 @@ class TrueType
         # OS_2
         if typeof json.OS_2 isnt 'undefined'
           ttf.OS_2 = OS_2Table.createFromJSON(json.OS_2)
+        
+        # cmap
+        if typeof json.cmap isnt 'undefined'
+          ttf.cmap = CmapTable.createFromJSON(json.cmap)
 
     # return ttf
     ttf
