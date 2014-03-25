@@ -85,6 +85,14 @@ class TTFDataView
     mantissa = [0, 1, -2, -1][(value >>> 14)]
     fraction = (value & 0x3fff) / Math.pow(2, 14)
     Math.round((mantissa + fraction) * 1000000) / 1000000
+  
+  getUint24: (offset) ->
+    @seek offset if typeof offset is 'number'
+    b = []
+    b[0] = @getByte()
+    b[1] = @getByte()
+    b[2] = @getByte()
+    (b[0] << 16) + (b[1] << 8) + b[2] 
 
   ###*
    * Return the long internal format of a date
