@@ -576,7 +576,7 @@
     }
 
     CmapSubTable.createFromTTFDataView = function(view, offset, ttf) {
-      var charCode, codePoint, currentOffset, endCharCode, endCount, entryCount, entrySelector, firstCode, glyphId, glyphIndexArray, hiBytes, i, id, idDelta, idRangeOffset, is32, j, length, map, mapping, maxSubHeaderIndex, nGroups, numChars, rangeOffset, rangeShift, reservePad, reserved, searchRange, segCount, startCharCode, startCount, startGlyphId, subHeaderIndex, subHeaderKey, subHeaderKeys, subHeaders, subTable, _aa, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9, _s, _t, _u, _v, _w, _x, _y, _z;
+      var additionalCount, charCode, codePoint, currentOffset, defaultUVSOffset, endCharCode, endCount, entryCount, entrySelector, firstCode, glyphId, glyphIndexArray, hiBytes, i, id, idDelta, idRangeOffset, is32, j, k, length, map, mapping, maxSubHeaderIndex, nGroups, nonDefaultUVSOffset, numChars, numUVSMappings, numUnicodeValueRanges, numVarSelectorRecords, rangeOffset, rangeShift, reservePad, reserved, searchRange, segCount, startCharCode, startCount, startGlyphId, startUnicodeValue, subHeaderIndex, subHeaderKey, subHeaderKeys, subHeaders, subTable, unicodeValue, unicodeValueRanges, varSelector, varSelectorRecords, _aa, _ab, _ac, _ad, _ae, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _ref, _ref1, _ref10, _ref11, _ref12, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9, _s, _t, _u, _v, _w, _x, _y, _z;
       view.seek(offset);
       subTable = new CmapSubTable();
       subTable.format = view.getUshort();
@@ -681,7 +681,7 @@
         firstCode = view.getUshort();
         entryCount = view.getUshort();
         console.log('firstCode: 0x' + firstCode.toString(16) + ', entryCount: ' + entryCount);
-        for (i = _s = 0; 0 <= entryCount ? _s <= entryCount : _s >= entryCount; i = 0 <= entryCount ? ++_s : --_s) {
+        for (i = _s = 0, _ref7 = entryCount - 1; 0 <= _ref7 ? _s <= _ref7 : _s >= _ref7; i = 0 <= _ref7 ? ++_s : --_s) {
           glyphId = view.getUshort();
           mapping.push({
             code: i + firstCode,
@@ -694,7 +694,7 @@
         length = view.getUlong();
         subTable.language = view.getUlong();
         is32 = [];
-        for (i = _t = 0; _t <= 8192; i = ++_t) {
+        for (i = _t = 0; _t <= 8191; i = ++_t) {
           is32.push(view.getByte());
         }
         nGroups = view.getUlong();
@@ -728,11 +728,11 @@
         length = view.getUlong();
         subTable.language = view.getUlong();
         nGroups = view.getUlong();
-        for (i = _x = 0, _ref7 = nGroups - 1; 0 <= _ref7 ? _x <= _ref7 : _x >= _ref7; i = 0 <= _ref7 ? ++_x : --_x) {
+        for (i = _x = 0, _ref8 = nGroups - 1; 0 <= _ref8 ? _x <= _ref8 : _x >= _ref8; i = 0 <= _ref8 ? ++_x : --_x) {
           startCharCode = view.getUlong();
           endCharCode = view.getUlong();
           startGlyphId = view.getUlong();
-          for (j = _y = 0, _ref8 = endCharCode - startCharCode; 0 <= _ref8 ? _y <= _ref8 : _y >= _ref8; j = 0 <= _ref8 ? ++_y : --_y) {
+          for (j = _y = 0, _ref9 = endCharCode - startCharCode; 0 <= _ref9 ? _y <= _ref9 : _y >= _ref9; j = 0 <= _ref9 ? ++_y : --_y) {
             charCode = startCharCode + j;
             codePoint = '0x' + charCode.toString(16);
             glyphId = startGlyphId + j;
@@ -748,7 +748,7 @@
         length = view.getUlong();
         subTable.language = view.getLong();
         nGroups = view.getLong();
-        for (i = _z = 0, _ref9 = nGroups - 1; 0 <= _ref9 ? _z <= _ref9 : _z >= _ref9; i = 0 <= _ref9 ? ++_z : --_z) {
+        for (i = _z = 0, _ref10 = nGroups - 1; 0 <= _ref10 ? _z <= _ref10 : _z >= _ref10; i = 0 <= _ref10 ? ++_z : --_z) {
           startCharCode = view.getUlong();
           endCharCode = view.getUlong();
           glyphId = view.getUlong();
@@ -759,6 +759,46 @@
             });
           }
         }
+      }
+      if (subTable.format === 14) {
+        length = view.getUlong();
+        numVarSelectorRecords = view.getUlong();
+        varSelectorRecords = [];
+        for (i = _ab = 0, _ref11 = numVarSelectorRecords - 1; 0 <= _ref11 ? _ab <= _ref11 : _ab >= _ref11; i = 0 <= _ref11 ? ++_ab : --_ab) {
+          currentOffset = offset + 2 + 4 + 4;
+          varSelector = '0x' + view.getUint24().toString(16);
+          defaultUVSOffset = view.getUlong();
+          nonDefaultUVSOffset = view.getUlong();
+          view.seek(offset + defaultUVSOffset);
+          numUnicodeValueRanges = view.getUlong();
+          unicodeValueRanges = [];
+          for (j = _ac = 0; 0 <= numUnicodeValueRanges ? _ac <= numUnicodeValueRanges : _ac >= numUnicodeValueRanges; j = 0 <= numUnicodeValueRanges ? ++_ac : --_ac) {
+            startUnicodeValue = view.getUint24();
+            additionalCount = view.getByte();
+            for (k = _ad = 0; 0 <= additionalCount ? _ad <= additionalCount : _ad >= additionalCount; k = 0 <= additionalCount ? ++_ad : --_ad) {
+              charCode = startUnicodeValue + k;
+              unicodeValueRanges.push({
+                varSelector: varSelector,
+                code: '0x' + charCode.toString(16)
+              });
+            }
+          }
+          view.seek(offset + nonDefaultUVSOffset);
+          numUVSMappings = view.getUlong();
+          for (j = _ae = 0, _ref12 = numUVSMappings - 1; 0 <= _ref12 ? _ae <= _ref12 : _ae >= _ref12; j = 0 <= _ref12 ? ++_ae : --_ae) {
+            unicodeValue = view.getUint24();
+            glyphId = view.getUshort();
+            unicodeValueRanges.push({
+              varSelector: varSelector,
+              code: '0x' + unicodeValue.toString(16),
+              gId: glyphId
+            });
+          }
+          view.seek(currentOffset);
+          varSelectorRecords.push(unicodeValueRanges);
+        }
+        console.log(varSelectorRecords);
+        mapping = varSelectorRecords;
       }
       subTable.mapping = mapping;
       return subTable;
@@ -2244,6 +2284,18 @@
       mantissa = [0, 1, -2, -1][value >>> 14];
       fraction = (value & 0x3fff) / Math.pow(2, 14);
       return Math.round((mantissa + fraction) * 1000000) / 1000000;
+    };
+
+    TTFDataView.prototype.getUint24 = function(offset) {
+      var b;
+      if (typeof offset === 'number') {
+        this.seek(offset);
+      }
+      b = [];
+      b[0] = this.getByte();
+      b[1] = this.getByte();
+      b[2] = this.getByte();
+      return (b[0] << 16) + (b[1] << 8) + b[2];
     };
 
     /**

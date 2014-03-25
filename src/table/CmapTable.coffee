@@ -270,6 +270,51 @@ class CmapSubTable
             gId: glyphId
           }
     
+    # format 14
+    # TODO, seems to be broken
+    if subTable.format is 14
+      length = view.getUlong()
+      numVarSelectorRecords = view.getUlong()
+      varSelectorRecords = []
+      
+      for i in [0..numVarSelectorRecords-1]
+        currentOffset = offset + 2+4+4
+        varSelector = '0x' + view.getUint24().toString(16)
+        defaultUVSOffset = view.getUlong()
+        nonDefaultUVSOffset = view.getUlong()
+        
+        view.seek offset + defaultUVSOffset
+        numUnicodeValueRanges = view.getUlong()
+        unicodeValueRanges = []
+        
+        for j in [0..numUnicodeValueRanges]
+          startUnicodeValue = view.getUint24()
+          additionalCount = view.getByte()
+          for k in [0..additionalCount]
+            charCode = startUnicodeValue + k
+            unicodeValueRanges.push {
+              varSelector: varSelector,
+              code: '0x' + charCode.toString(16)
+            }
+        
+        view.seek offset + nonDefaultUVSOffset
+        numUVSMappings = view.getUlong()
+        
+        for j in [0..numUVSMappings-1]
+          unicodeValue = view.getUint24()
+          glyphId = view.getUshort()
+          unicodeValueRanges.push {
+            varSelector: varSelector,
+            code: '0x' + unicodeValue.toString(16),
+            gId: glyphId
+          }
+        
+        view.seek currentOffset
+        
+        varSelectorRecords.push unicodeValueRanges
+
+      mapping = varSelectorRecords
+    
     subTable.mapping = mapping
     
     subTable
