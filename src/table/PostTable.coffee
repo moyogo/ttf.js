@@ -111,8 +111,21 @@ class PostTable
   # @param {Object|String} json
   # @return {PostTable}
   @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON.parse json
+    
     post = new PostTable()
-    console.log "PostTable.createFromJSON() not yet implemented"
+    
+    post.version = json.version
+    post.italicAngle = json.italicAngle
+    post.underlinePosition = json.underlinePosition
+    post.underlineThickness = json.underlineThickness
+    post.isFixedPitch = json.isFixedPitch
+    post.minMemType42 = json.minMemType42
+    post.maxMemType42 = json.maxMemType42
+    post.mimMemType1 = json.mimMemType1
+    post.maxMemType1 = json.maxMemType1
+    post.names = json.names
     
     post
 

@@ -564,6 +564,25 @@
       return cmap;
     };
 
+    CmapTable.prototype.getGlyphIndex = function(character) {
+      var glyphIds, map, table, _i, _j, _len, _len1, _ref;
+      glyphIds = [];
+      _ref = this.tables;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        table = _ref[_i];
+        console.log(table);
+        if (table.isUnicode()) {
+          for (_j = 0, _len1 = mapping.length; _j < _len1; _j++) {
+            map = mapping[_j];
+            if (map.code === character) {
+              glyphIds.push(map.gId);
+            }
+          }
+        }
+      }
+      return glyphIds;
+    };
+
     return CmapTable;
 
   })();
@@ -680,7 +699,6 @@
         subTable.language = view.getUshort();
         firstCode = view.getUshort();
         entryCount = view.getUshort();
-        console.log('firstCode: 0x' + firstCode.toString(16) + ', entryCount: ' + entryCount);
         for (i = _s = 0, _ref7 = entryCount - 1; 0 <= _ref7 ? _s <= _ref7 : _s >= _ref7; i = 0 <= _ref7 ? ++_s : --_s) {
           glyphId = view.getUshort();
           mapping.push({
@@ -817,11 +835,11 @@
       return subTable;
     };
 
-    CmapSubTable.isUnicode = function() {
+    CmapSubTable.prototype.isUnicode = function() {
       return this.plaformId === 0 || (this.plaformId === 3 && (this.encodingId === 1 || this.encodingId === 1));
     };
 
-    CmapSubTable.isSymbol = function() {
+    CmapSubTable.prototype.isSymbol = function() {
       return this.platformId === 3 && this.encodingId === 0;
     };
 
@@ -2016,10 +2034,10 @@
 
     function PostTable() {
       this.version = 0;
-      this.italicAnge = 0;
+      this.italicAngle = 0;
       this.underlinePosition = 0;
       this.underlineThickness = 0;
-      this.isFixedPtich = 0;
+      this.isFixedPitch = 0;
       this.minMemType42 = 0;
       this.maxMemType42 = 0;
       this.mimMemType1 = 0;
@@ -2077,8 +2095,20 @@
 
     PostTable.createFromJSON = function(json) {
       var post;
+      if (typeof json === 'string') {
+        json = JSON.parse(json);
+      }
       post = new PostTable();
-      console.log("PostTable.createFromJSON() not yet implemented");
+      post.version = json.version;
+      post.italicAngle = json.italicAngle;
+      post.underlinePosition = json.underlinePosition;
+      post.underlineThickness = json.underlineThickness;
+      post.isFixedPitch = json.isFixedPitch;
+      post.minMemType42 = json.minMemType42;
+      post.maxMemType42 = json.maxMemType42;
+      post.mimMemType1 = json.mimMemType1;
+      post.maxMemType1 = json.maxMemType1;
+      post.names = json.names;
       return post;
     };
 
@@ -2265,6 +2295,9 @@
           }
           if (typeof json.cmap !== 'undefined') {
             ttf.cmap = CmapTable.createFromJSON(json.cmap);
+          }
+          if (typeof json.post !== 'undefined') {
+            ttf.cmap = PostTable.createFromJSON(json.post);
           }
         }
       }

@@ -222,8 +222,8 @@ class TrueType
           ttf.cmap = CmapTable.createFromJSON(json.cmap)
           
         # post
-        #if typeof json.post isnt 'undefined'
-        #  ttf.cmap = PostTable.createFromJSON(json.post)
+        if typeof json.post isnt 'undefined'
+          ttf.cmap = PostTable.createFromJSON(json.post)
 
     # return ttf
     ttf
