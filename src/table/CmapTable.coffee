@@ -63,6 +63,21 @@ class CmapTable
     
     # return cmap
     cmap
+  
+  # get glyph index for character
+  # @param {String} character
+  # @return {glyphIds[]}
+  getGlyphIndex: (character) ->
+    glyphIds = []
+    
+    for table in @tables
+      console.log table
+      if table.isUnicode()
+        for map in mapping
+          if map.code is character
+            glyphIds.push map.gId
+    
+    glyphIds
 
 
 class CmapSubTable
@@ -168,12 +183,9 @@ class CmapSubTable
       mapping= []
       
       for i in [0..segCount-1]
-        #console.log '' + subTable.startCount[i] + ' -- ' + subTable.endCount[i]
         for j in [0..(endCount[i] - startCount[i])]
           charCode = j + startCount[i]
-          #glyphCode = view.getUshort()
           glyphId = charCode + idDelta[i]
-          #console.log '' + codeValue + ' ' + glyphCode + ' ' + glyphId
           codePoint = '0x' + charCode.toString(16)
           mapping.push {
             code: codePoint,
@@ -186,7 +198,6 @@ class CmapSubTable
       subTable.language = view.getUshort()
       firstCode = view.getUshort()
       entryCount = view.getUshort()
-      console.log 'firstCode: 0x' + firstCode.toString(16) + ', entryCount: ' + entryCount
       
       for i in [0..entryCount-1]
         glyphId = view.getUshort()
@@ -332,10 +343,10 @@ class CmapSubTable
     
     subTable
   
-  @isUnicode: () ->
+  isUnicode: () ->
     (@plaformId is 0 or (@plaformId is 3 and (@encodingId is 1 or @encodingId is 1)))
   
-  @isSymbol: () ->
+  isSymbol: () ->
     (@platformId is 3 and @encodingId is 0)
 
 # exports
