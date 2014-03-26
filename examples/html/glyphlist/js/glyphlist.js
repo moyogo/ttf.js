@@ -15,7 +15,7 @@ $(function () {
       $(readbutton).trigger('click');
     });
 
-    onWindowReisze();
+    onWindowResize();
   } else {
     alert('The File APIs are not fully supported in this browser.');
   }
@@ -54,19 +54,19 @@ $(function () {
       if ($('#tabMenu ol li').length === 1) {
         headerHeight = 53;
         $('#tabs').stop().animate({top: headerHeight}, 300);
-        onWindowReisze();
+        onWindowResize();
       }
     }
   });
 
   
   $(window).resize(function(){
-    onWindowReisze();
+    onWindowResize();
   });
   
 });
 
-function onWindowReisze() {
+function onWindowResize() {
   var windowHeight = $(window).height();
   $('.tab').height(windowHeight - headerHeight);
   
@@ -86,7 +86,7 @@ function createNewTab(title, content, callback) {
     callback(tabId);
   }
   tabId++
-  onWindowReisze();
+  onWindowResize();
 }
 
 // glyph tab
@@ -193,7 +193,7 @@ function renderFontList(e) {
       createGlyphTab($(this).attr('id'));
     });
 
-    onWindowReisze();
+    onWindowResize();
 
   });
 };
