@@ -84,6 +84,20 @@ class TrueType
       return false
 
     new Glyph glyphData, @
+  
+  # Return GlyphName at the specified id.
+  # @param {Number} id id of Glyph
+  # @return {String}
+  getGlyphNameById: (id) ->
+    if @getNumGlyphs() is 0
+      return false
+    
+    name = @post.getGlyphNameById id
+    
+    if name is false
+      return false
+    
+    name
 
   # Create TrueType instance from TTFDataView
   # @param {Buffer|Array|String} buffer buffer can be either a binary String,

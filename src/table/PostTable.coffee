@@ -128,6 +128,20 @@ class PostTable
     post.names = json.names
     
     post
+  
+  # Return GlyphName at the specified id
+  # @param {Number} id id of Glyph
+  # @return {String}
+  getGlyphNameById: (id) ->
+    glyphName = false
+    name = @names[parseInt(id)]
+    if parseInt(name.gId) is parseInt(id)
+      glyphName = name.name
+    else
+      for name in @names
+        if parseInt(name.gId, 10) is parseInt(id, 10)
+          glyphName = name.name
+    glyphName
 
 # exports
 module.exports = PostTable
