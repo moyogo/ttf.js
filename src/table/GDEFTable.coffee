@@ -40,8 +40,8 @@ class GDEFTable
     if ligCaretListOffset
       GDEF.ligCaretList = LigCaretListTable.createFromTTFDataView(view, offset + ligCaretListOffset)
     
-    # if markAttachClassDefListOffset
- #      GDEF.markAttachClassDefList = new MarkAttachClassDef()
+    if markAttachClassDefListOffset
+      GDEF.markAttachClassDefList = ClassDefinitionTable.createFromTTFDataView(view, offset + markAttachClassDefListOffset)
     
 #     if markGlyphSetsDefOffset
 #       GDEF.markGlyphSetsDef = new markGlyphSetsDef() 
@@ -78,7 +78,7 @@ class AttachmentListTable
     attachmentListTable = new AttachmentListTable()
     
     coverageOffset = view.getUshort()
-    coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+    attachmentListTable.coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
     attachmentListTable.glyphCount = glyphCount = view.getUshort()
     attachPointOffset = view.getUshort()
     
@@ -90,6 +90,11 @@ class AttachmentListTable
     
     attachmentListTable = new AttachmentListTable()
     attachmentListTable.glyphCount = json.glyphCount
+    attachmentListTable.coverage = CoverageTable.createFromJSON(json.coverage)
+    
+    # return
+    attachmentListTable
+
 
 class LigCaretListTable
   constructor: () ->
@@ -105,7 +110,21 @@ class LigCaretListTable
     ligCaretList = new LigCaretListTable()
     coverageOffset = view.getUshort()
     coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
-    ligCaretList.coveage = coverage
+    ligCaretList.coverage = coverage
     ligCaretList.ligGlyphCount = ligGlyphCount = view.getUshort()
     
+    # return
     ligCaretList
+
+  # Create LigCaretListTable from JSON
+  # @param {Object|String} json
+  # @return {LigCaretListTable}
+  @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON parse json
+    
+    ligCaretList = new LigCareListTable()
+    ligCareList.coverage = CoverageTable.createFromJSON(json.coverage)
+    
+    # return
+    LigCaretList

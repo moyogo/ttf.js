@@ -30,6 +30,7 @@ class CoverageTable
         glyphId = view.getUshort()
         glyphArray.push glyphId
       coverageTable.glyphArray = glyphArray
+    
     if coverageFormat is 2
       rangeCount = view.getUshort()
       rangeRecord = []
@@ -42,10 +43,27 @@ class CoverageTable
           end: end,
           startCoverageIndex : startCoverageIndex
         }
-      coverageTable.glyphArray = rangeRecord
+      coverageTable.rangeRecord = rangeRecord
 
     # return
     coverageTable
+  
+  # Create CoverageTable from JSON
+  # @param {Object|String} json
+  # @return {CoverageTable}
+  @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON.parse json
+    
+    coverageTable = new CoverageTable()
+    coverageTable.coverageFormat = coverageFormat = json.coverageFormat
+    if coverageFormat is 1
+      coverageTable.glyphArray = json.glyphArray
+    if coverageFormat is 2
+      coverageTable.rangeRecord = json.rangeRecord
+    
+    # return
+    coverageTable 
   
 # ## Class Definition Table
 class ClassDefinitionTable
@@ -89,6 +107,21 @@ class ClassDefinitionTable
     
     # return
     classDefTable
+  
+  # Create ClassDefTable from JSON
+  # @param {Object|String} json
+  # @return {ClassDefTable}
+  @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON.parse json
+    
+    classDefTable = new ClassDefTable()
+    classDefTable.classFormat = json.classFormat
+    classDefTable.classValueArray = json.classValueArray
+    
+    # return
+    classDefTable
+    
 
 # exports
 module.exports = ClassDefinitionTable

@@ -330,6 +330,9 @@ class CmapSubTable
     
     subTable
 
+  # Create CmapSubTable from JSON
+  # @param {Object|String} json
+  # @return {CmapSubTable}
   @createFromJSON: (json) ->
     if typeof json == 'string'
       json = JSON.parse json
