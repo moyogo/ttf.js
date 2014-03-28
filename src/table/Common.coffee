@@ -56,7 +56,7 @@ class ClassDefinitionTable
   # @param {TTFDataView} view
   # @param {Number} offset
   # @return {ClassDefinitionTable}
-  createFromTTFDataView: (view, offset) ->
+  @createFromTTFDataView: (view, offset) ->
     view.seek offset
     classDefTable = new ClassDefinitionTable()
     classDefTable.classFormat = classFormat = view.getUshort()

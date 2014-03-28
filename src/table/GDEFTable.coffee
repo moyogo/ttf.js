@@ -32,18 +32,17 @@ class GDEFTable
       markGlyphSetsDefOffset = view.getUshort()
     
     if glyphClassDefOffset
-      glyphClassDef = new ClassDefinitionTable()
-      GDEF.glyphClassDef = glyphClassDef.createFromTTFDataView(view, offset + glyphClassDefOffset)
+      GDEF.glyphClassDef = ClassDefinitionTable.createFromTTFDataView(view, offset + glyphClassDefOffset)
     
     if attachListOffset
-      GDEF.attachList = new ClassDefinitionTable()
+      GDEF.attachList = ClassDefinitionTable.createFromTTFDataView(view, offset + attacheListOffset)
     
     if ligCaretListOffset
       GDEF.ligCaretList = LigCaretListTable.createFromTTFDataView(view, offset + ligCaretListOffset)
     
     # if markAttachClassDefListOffset
-#       GDEF.markAttachClassDefList = new MarkAttachClassDef()
-#     
+ #      GDEF.markAttachClassDefList = new MarkAttachClassDef()
+    
 #     if markGlyphSetsDefOffset
 #       GDEF.markGlyphSetsDef = new markGlyphSetsDef() 
     
