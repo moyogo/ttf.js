@@ -35,7 +35,7 @@ class GDEFTable
       GDEF.glyphClassDef = ClassDefinitionTable.createFromTTFDataView(view, offset + glyphClassDefOffset)
     
     if attachListOffset
-      GDEF.attachList = ClassDefinitionTable.createFromTTFDataView(view, offset + attachListOffset)
+      GDEF.attachList = AttachmentListTable.createFromTTFDataView(view, offset + attachListOffset)
     
     if ligCaretListOffset
       GDEF.ligCaretList = LigCaretListTable.createFromTTFDataView(view, offset + ligCaretListOffset)
@@ -46,6 +46,7 @@ class GDEFTable
     if markGlyphSetsDefOffset
       GDEF.markGlyphSetsDef = MarkGlyphSetsDef.createFromTTFDataView(view, offset + markGlyphSetsDefOffset)
     
+    # return
     GDEF
   
   # Create GDEFTable from JSON
@@ -60,7 +61,8 @@ class GDEFTable
       GDEF.glyphClassDef = ClassDefinitionTable.createFromJSON(json.glyphClassDef)
     if json.attachList isnt undefined
       GDEF.attachList = AttachmentListTable.createFromJSON(json.attachList)
-        
+    
+    # return
     GDEF
 
 # ## Attachment List table Class
@@ -83,6 +85,7 @@ class AttachmentListTable
     attachmentListTable.glyphCount = glyphCount = view.getUshort()
     attachPointOffset = view.getUshort()
     
+    # return
     attachmentListTable
   
   @createFromJSON: (json) ->
@@ -188,6 +191,9 @@ class CaretValueTable
       when 3  
        caretValueTable.coordinate = json.coordinate
        caretValueTable.deviceTable = DeviceTable.createFromJSON(json.devicetable)
+    
+    # return
+    caretValueTable
 
 # ## MarkGlyphSetsDef Class
 class MarkGlyphSetsDef
