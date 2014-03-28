@@ -254,8 +254,8 @@ class TrueType
           ttf.cmap = PostTable.createFromJSON(json.post)
 
         # GDEF
-        #if typeof json.GDEF isnt 'undefined'
-        #  ttf.cmap = PostTable.createFromJSON(json.GDEF)
+        if typeof json.GDEF isnt 'undefined'
+          ttf.cmap = GDEFTable.createFromJSON(json.GDEF)
 
 
     # return ttf
