@@ -7,16 +7,55 @@
 
 # ## Common Table Formats
 
+# ## Coverage Table
+class CoverageTable
+  constructor: () ->
+    @coverageFormat = 0
+  
+  # Create CoverageTable instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {CoverageTable}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    coverageTable = new CoverageTable()
+    
+    coverageTable.coverageFormat = coverageFormat = view.getUshort()
+    
+    if coverageFormat is 1
+      glyphCount = view.getUshort()
+      glyphArray = []
+      for i in [0..glyphCount-1]
+        glyphId = view.getUshort()
+        glyphArray.push glyphId
+      coverageTable.glyphArray = glyphArray
+    if coverageFormat is 2
+      rangeCount = view.getUshort()
+      rangeRecord = []
+      for i in [0..rangeCount]
+        start = view.getUshort()
+        end = view.getUshort()
+        startCoverageIndex = view.getUshort()
+        rangeRecord.push {
+          start: start,
+          end: end,
+          startCoverageIndex : startCoverageIndex
+        }
+      coverageTable.glyphArray = rangeRecord
+
+    # return
+    coverageTable
+  
 # ## Class Definition Table
 class ClassDefinitionTable
   constructor: () ->
     @classFormat = 0
   
   # Create ClassDefinitionTable instance from TTFDataView
-  # @parama {TTFDataView} view
+  # @param {TTFDataView} view
   # @param {Number} offset
-  # @param {TrueType} ttf
-  # @return {GDEFTable}
+  # @return {ClassDefinitionTable}
   createFromTTFDataView: (view, offset) ->
     view.seek offset
     classDefTable = new ClassDefinitionTable()
@@ -48,6 +87,7 @@ class ClassDefinitionTable
           }
     classDefTable.classValueArray = classValueArray
     
+    # return
     classDefTable
 
 # exports
