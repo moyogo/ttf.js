@@ -43,8 +43,8 @@ class GDEFTable
     if markAttachClassDefListOffset
       GDEF.markAttachClassDefList = ClassDefinitionTable.createFromTTFDataView(view, offset + markAttachClassDefListOffset)
     
-#     if markGlyphSetsDefOffset
-#       GDEF.markGlyphSetsDef = new markGlyphSetsDef() 
+    if markGlyphSetsDefOffset
+      GDEF.markGlyphSetsDef = MarkGlyphSetsDef.createFromTTFDataView(view, offset + markGlyphSetsDefOffset)
     
     GDEF
   
@@ -147,7 +147,7 @@ class CaretValueTable
   constructor: () ->
     @format = 0
   
-  # Create CaretValueTable
+  # Create CaretValueTable instance from TTFDataView
   # @param {TTFDataView} view
   # @param {Number} offset
   # @return {CaretValueTable}
@@ -189,3 +189,51 @@ class CaretValueTable
        caretValueTable.coordinate = json.coordinate
        caretValueTable.deviceTable = DeviceTable.createFromJSON(json.devicetable)
 
+# ## MarkGlyphSetsDef Class
+class MarkGlyphSetsDef
+  constructor: () ->
+    @format = 0
+  
+  # Create MarkGlyphSetsDef instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {MarkGlyphSetsDef}
+  @createFromTTFView: (view, offset) ->
+    markGlyphSetsDef = new MarkGlyphSetsDef()
+    
+    markGlyphSetsDef.format = format = view.getUshort()
+    markGlyphSetsDef.markSetCount = markSetCount = view.getUshort()
+    
+    coverages = []
+    if markSetCount > 0
+      for i in [0..markSetCount-1]
+        coverageOffset = view.getUlong()
+        coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+        coverages.push coverage
+        view.seek (offset + 4 + i*4)
+    
+    markGlyphSetsDef.coverages = coverages
+    
+    # return
+    markGlyphSetsDef
+    
+  # Create MarkGlyphSetsDef from JSON
+  # @param {Object|String} json
+  # @return {MarkGlyphSetsDef}
+  @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON.parse json
+    
+    markGlyphSetsDef = new MarkGlyphSetsDef()
+    markGlyphSetsDef.format = json.format
+    markGlyphSetsDef.markSetCount = markSetCount = json.markSetCount
+    
+    coverages = []
+    if markSetCount > 0
+      for i in [0..markSetCount-1]
+        coverage = CoverageTable.createFromJSON(json.coverages[i])
+        coverages.push coverage
+    markGlyphSetsDef.coverages = coverages
+    
+    # return
+    markGlyphSetsDef
