@@ -170,6 +170,9 @@ class CaretValueTable
     # return
     caretValueTable
   
+  # Create CaretValueTable from JSON
+  # @param {Object|String} json
+  # @return {CaretValueTable}
   @createFromJSON: (json) ->
     if typeof json == 'string'
       json = JSON.parse json
