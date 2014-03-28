@@ -34,7 +34,7 @@ class CoverageTable
     if coverageFormat is 2
       rangeCount = view.getUshort()
       rangeRecord = []
-      for i in [0..rangeCount]
+      for i in [0..rangeCount-1]
         start = view.getUshort()
         end = view.getUshort()
         startCoverageIndex = view.getUshort()
