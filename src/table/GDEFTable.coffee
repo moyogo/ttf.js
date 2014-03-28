@@ -55,13 +55,20 @@ class GDEFTable
   @createfromJSON: (json) ->
     if typeof json == 'string'
       json = JSON.parse json
+    
     GDEF = new GDEFTable()
     GDEF.version = json.version
     if json.glyphClassDef isnt undefined
       GDEF.glyphClassDef = ClassDefinitionTable.createFromJSON(json.glyphClassDef)
     if json.attachList isnt undefined
       GDEF.attachList = AttachmentListTable.createFromJSON(json.attachList)
-    
+    if json.ligCaretList isnt undefined
+      GDEF.ligCaretList = LigCaretListTable.createFromJSON(json.ligCaretList)
+    if json.markAttachClassDefList isnt undefined
+      GDEF.markAttachClassDefList = ClassDefinition.createFromJSON(json.markAttachClassDefList)
+    if json.markGlyphSetsDef isnt undefined
+      GDEF.markGlyphSetsDef = MarkGlyphSetsDef.createFromJSON(json.markGlyphSetsDef)
+
     # return
     GDEF
 
