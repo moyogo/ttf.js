@@ -24,25 +24,28 @@ class CoverageTable
     coverageTable.coverageFormat = coverageFormat = view.getUshort()
     
     if coverageFormat is 1
-      glyphCount = view.getUshort()
+      coverageTable.glyphCount = glyphCount = view.getUshort()
       glyphArray = []
-      for i in [0..glyphCount-1]
-        glyphId = view.getUshort()
-        glyphArray.push glyphId
+      
+      if glyphCount > 0
+        for i in [0..glyphCount-1]
+          glyphId = view.getUshort()
+          glyphArray.push glyphId
       coverageTable.glyphArray = glyphArray
     
     if coverageFormat is 2
       rangeCount = view.getUshort()
       rangeRecord = []
-      for i in [0..rangeCount-1]
-        start = view.getUshort()
-        end = view.getUshort()
-        startCoverageIndex = view.getUshort()
-        rangeRecord.push {
-          start: start,
-          end: end,
-          startCoverageIndex : startCoverageIndex
-        }
+      if rangeCount > 0
+        for i in [0..rangeCount-1]
+          start = view.getUshort()
+          end = view.getUshort()
+          startCoverageIndex = view.getUshort()
+          rangeRecord.push {
+            start: start,
+            end: end,
+            startCoverageIndex : startCoverageIndex
+          }
       coverageTable.rangeRecord = rangeRecord
 
     # return
@@ -84,25 +87,29 @@ class ClassDefinitionTable
       startGlyph = view.getUshort()
       glyphCount = view.getUshort()
       classValueArray = []
-      for i in [0..glyphCount-1]
-        classId = view.getUshort()
-        classValueArray.push {
-          gId: startGlyph + i,
-          class: classId
-        }
+      
+      if glyphCount > 0
+        for i in [0..glyphCount-1]
+          classId = view.getUshort()
+          classValueArray.push {
+            gId: startGlyph + i,
+            class: classId
+          }
     
     if classFormat is 2
       classRangeCount = view.getUshort()
       classRangeRecords = []
-      for i in [0..classRangeCount-1]
-        start = view.getUshort()
-        end = view.getUshort()
-        classId = view.getUshort()
-        for j in [start..end]
-          classValueArray.push {
-            gId: j,
-            class: classId
-          }
+      
+      if classRangeCount > 0
+        for i in [0..classRangeCount-1]
+          start = view.getUshort()
+          end = view.getUshort()
+          classId = view.getUshort()
+          for j in [start..end]
+            classValueArray.push {
+              gId: j,
+              class: classId
+            }
     classDefTable.classValueArray = classValueArray
     
     # return

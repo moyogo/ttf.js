@@ -79,6 +79,8 @@ class AttachmentListTable
     
     coverageOffset = view.getUshort()
     attachmentListTable.coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+    
+    view.seek (offset + 2)
     attachmentListTable.glyphCount = glyphCount = view.getUshort()
     attachPointOffset = view.getUshort()
     
@@ -110,6 +112,8 @@ class LigCaretListTable
     ligCaretList = new LigCaretListTable()
     coverageOffset = view.getUshort()
     coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+    
+    view.seek (offset + 2)
     ligCaretList.coverage = coverage
     ligCaretList.ligGlyphCount = ligGlyphCount = view.getUshort()
     
