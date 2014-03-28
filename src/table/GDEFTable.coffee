@@ -117,6 +117,16 @@ class LigCaretListTable
     ligCaretList.coverage = coverage
     ligCaretList.ligGlyphCount = ligGlyphCount = view.getUshort()
     
+    ligGlyph = []
+    if ligGlyphCount > 0
+      for i in [0..ligGlyphCount]
+        caretCount = view.getUshort()
+        caretValueOffset = view.getUshort()
+        caretValue = CaretValueTable.createFromTTFDataView(view, offset + caretValueOffset)
+        ligGlyph.push {
+          'caretCount': caretCount
+        }
+    
     # return
     ligCaretList
 
@@ -131,4 +141,33 @@ class LigCaretListTable
     ligCareList.coverage = CoverageTable.createFromJSON(json.coverage)
     
     # return
-    LigCaretList
+    ligCaretList
+
+class CaretValueTable
+  constructor: () ->
+    @caretValueFormat = 0
+  
+  # Create CaretValueTable
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {CaretValueTable}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    caretValueTable = new CaretValueTable()
+    
+    caretValueTable.caretValueFormat = caretValueFormat = view.getUshort()
+    
+    if caretValueFormat is 1
+      caretValueTable.coordinate = view.getShort()
+      
+    if caretValueFormat is 2
+      caretValueTable.caretValuePoint =  view.getUshort()
+    
+    if caretValueFormat is 3
+      caretValueTable.coordinate = view.getShort()
+      deviceTableOffset = view.getShort()
+      
+      caretValueTable.deviceTable = DeviceTable.createFromTTFDataView(view, offset + deviceTableOffset)
+    
+    # return
+    caretValueTable

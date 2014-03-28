@@ -129,6 +129,28 @@ class ClassDefinitionTable
     # return
     classDefTable
     
+# ## Device Table
+class DeviceTable
+  constructor: () ->
+    @startSize = null
+    @endSize = null
+    @deltaFormt = 0
+    @deltaValue = []
+
+  # Create DeviceTable from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {DeviceTable}
+  @createFromTTFDataView: (view, offset) ->
+    deviceTable = new DeviceTable()
+    deviceTable.startSize = view.getUshort()
+    deviceTable.endSize = view.getUshort()
+    deviceTable.deltaFormat = view.getUshort()
+    # TODO
+    #deviceTable.deltaValue
+    
+    # return
+    deviceTable
 
 # exports
 module.exports = ClassDefinitionTable
