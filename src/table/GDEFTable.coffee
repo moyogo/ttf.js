@@ -63,7 +63,6 @@ class GDEFTable
         
     GDEF
 
-# TODO
 # ## Attachment List table Class
 class AttachmentListTable
   constructor: () ->
@@ -97,7 +96,7 @@ class AttachmentListTable
     # return
     attachmentListTable
 
-
+# ## LigCaret List table Class
 class LigCaretListTable
   constructor: () ->
     @ligGlyphCount = 0
@@ -143,9 +142,10 @@ class LigCaretListTable
     # return
     ligCaretList
 
+# ## CaretValue table Class
 class CaretValueTable
   constructor: () ->
-    @caretValueFormat = 0
+    @format = 0
   
   # Create CaretValueTable
   # @param {TTFDataView} view
@@ -155,19 +155,34 @@ class CaretValueTable
     view.seek offset
     caretValueTable = new CaretValueTable()
     
-    caretValueTable.caretValueFormat = caretValueFormat = view.getUshort()
+    caretValueTable.format = format = view.getUshort()
     
-    if caretValueFormat is 1
-      caretValueTable.coordinate = view.getShort()
-      
-    if caretValueFormat is 2
-      caretValueTable.caretValuePoint =  view.getUshort()
-    
-    if caretValueFormat is 3
-      caretValueTable.coordinate = view.getShort()
-      deviceTableOffset = view.getShort()
-      
-      caretValueTable.deviceTable = DeviceTable.createFromTTFDataView(view, offset + deviceTableOffset)
+    switch format
+      when 1
+        caretValueTable.coordinate = view.getShort()
+      when 2
+        caretValueTable.caretValuePoint =  view.getUshort()
+      when 3
+        caretValueTable.coordinate = view.getShort()
+        deviceTableOffset = view.getShort()
+        caretValueTable.deviceTable = DeviceTable.createFromTTFDataView(view, offset + deviceTableOffset)
     
     # return
     caretValueTable
+  
+  @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON.parse json
+    
+    caretValueTable = new CaretValueTabel()
+    caretValueTable.format = format = json.format
+    
+    switch format
+      when 1
+        caretValueTable.coordinate = json.coordinate
+      when 2
+        caretvalueTable.caretValuePoint = json.caretValuePoint
+      when 3  
+       caretValueTable.coordinate = json.coordinate
+       caretValueTable.deviceTable = DeviceTable.createFromJSON(json.devicetable)
+

@@ -151,6 +151,20 @@ class DeviceTable
     
     # return
     deviceTable
+  
+  # Create DeviceTable from JSON
+  # @param {Object|String} json
+  # @return {DeviceTable}
+  @createFromJSON: (json) ->
+    if typeof json == 'string'
+      json = JSON.parse json
+    
+    deviceTable = new DeviceTable()
+    devicaTable.startSize = json.startSize
+    devicaTable.endSize = json.endSize
+    deviceTable.deltaFormat = json.deltaFormat
+    # TODO
+    #deviceTable.deltaValue
 
 # exports
 module.exports = ClassDefinitionTable
