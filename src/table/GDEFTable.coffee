@@ -35,7 +35,7 @@ class GDEFTable
       GDEF.glyphClassDef = ClassDefinitionTable.createFromTTFDataView(view, offset + glyphClassDefOffset)
     
     if attachListOffset
-      GDEF.attachList = ClassDefinitionTable.createFromTTFDataView(view, offset + attacheListOffset)
+      GDEF.attachList = ClassDefinitionTable.createFromTTFDataView(view, offset + attachListOffset)
     
     if ligCaretListOffset
       GDEF.ligCaretList = LigCaretListTable.createFromTTFDataView(view, offset + ligCaretListOffset)
