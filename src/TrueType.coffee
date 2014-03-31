@@ -255,7 +255,7 @@ class TrueType
 
         # GDEF
         if typeof json.GDEF isnt 'undefined'
-          ttf.cmap = GDEFTable.createFromJSON(json.GDEF)
+          ttf.GDEF = GDEFTable.createFromJSON(json.GDEF)
 
 
     # return ttf
