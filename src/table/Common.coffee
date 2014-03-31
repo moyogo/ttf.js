@@ -123,7 +123,7 @@ class ClassDefinitionTable
     if typeof json == 'string'
       json = JSON.parse json
     
-    classDefTable = new ClassDefTable()
+    classDefTable = new ClassDefinitionTable()
     classDefTable.classFormat = json.classFormat
     classDefTable.classValueArray = json.classValueArray
     

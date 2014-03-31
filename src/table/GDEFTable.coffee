@@ -52,7 +52,7 @@ class GDEFTable
   # Create GDEFTable from JSON
   # @param {Object|String} json
   # @return {GDEFTable}
-  @createfromJSON: (json) ->
+  @createFromJSON: (json) ->
     if typeof json == 'string'
       json = JSON.parse json
     
@@ -65,10 +65,10 @@ class GDEFTable
     if json.ligCaretList isnt undefined
       GDEF.ligCaretList = LigCaretListTable.createFromJSON(json.ligCaretList)
     if json.markAttachClassDefList isnt undefined
-      GDEF.markAttachClassDefList = ClassDefinition.createFromJSON(json.markAttachClassDefList)
+      GDEF.markAttachClassDefList = ClassDefinitionTable.createFromJSON(json.markAttachClassDefList)
     if json.markGlyphSetsDef isnt undefined
       GDEF.markGlyphSetsDef = MarkGlyphSetsDef.createFromJSON(json.markGlyphSetsDef)
-
+    
     # return
     GDEF
 
