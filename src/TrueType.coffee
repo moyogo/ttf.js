@@ -17,6 +17,7 @@ CmapTable = require ('./table/CmapTable')
 NameTable = require ('./table/NameTable')
 PostTable = require ('./table/PostTable')
 GDEFTable = require ('./table/GDEFTable')
+GPOSTable = require ('./table/GPOSTable')
 
 Glyph = require ('./glyph/Glyph')
 
@@ -184,6 +185,10 @@ class TrueType
         if typeof tableOffsets['GDEF'] isnt 'undefined'
           ttf.GDEF = GDEFTable.createFromTTFDataView(view, tableOffsets['GDEF'], ttf)
 
+        # GPOS
+        if typeof tableOffsets['GPOS'] isnt 'undefined'
+                  ttf.GPOS = GPOSTable.createFromTTFDataView(view, tableOffsets['GPOS'], ttf)
+
     # return ttf
     ttf
 
@@ -257,6 +262,10 @@ class TrueType
         if typeof json.GDEF isnt 'undefined'
           ttf.GDEF = GDEFTable.createFromJSON(json.GDEF)
 
+        # GPOS
+        if typeof json.GPOS isnt 'undefined'
+          ttf.GPOS = GPOSTable.createFromJSON(json.GPOS)
+          console.log ttf.GPOS
 
     # return ttf
     ttf

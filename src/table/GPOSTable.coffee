@@ -25,12 +25,24 @@ class GPOSTable
     featureListOffset = view.getUshort()
     lookupListOffset = view.getUshort()
     
+    scriptList = ScriptListTable.createFromTTFDataView(view, offset + scriptListOffset)
+    
+    GPOS.scriptList = scriptList
+    
+    # return
+    GPOS
 
   # Create GPOSTable from JSON
   # @param {Object|String} json
   # @return {GPOSTable}
-  @createfromJSON: (json) ->
+  @createFromJSON: (json) ->
     if typeof json == 'string'
       json = JSON.parse json
     
     GPOS = new GPOSTable()
+    GPOS.version = json.version
+    
+    GPOS.scriptList = ScriptListTable.createFromJSON(json.scriptList)
+    
+    # return
+    GPOS
