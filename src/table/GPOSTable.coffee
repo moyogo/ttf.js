@@ -26,8 +26,12 @@ class GPOSTable
     lookupListOffset = view.getUshort()
     
     scriptList = ScriptListTable.createFromTTFDataView(view, offset + scriptListOffset)
+    featureList = FeatureListTable.createFromTTFDataView(view, offset + featureListOffset)
+    lookupList = LookupListTable.createFromTTFDataView(view, offset + lookupListOffset, "GPOS")
     
     GPOS.scriptList = scriptList
+    GPOS.featureList = featureList
+    GPOS.lookupList = lookupList
     
     # return
     GPOS
@@ -43,6 +47,8 @@ class GPOSTable
     GPOS.version = json.version
     
     GPOS.scriptList = ScriptListTable.createFromJSON(json.scriptList)
+    GPOS.featureList = FeatureListTable.createFromJSON(json.featureList)
+    GPOS.lookupList = LookupListTable.createFromJSON(json.lookupList, "GPOS")
     
     # return
     GPOS
