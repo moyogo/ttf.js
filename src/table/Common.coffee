@@ -29,6 +29,19 @@ GSUBLookupType = {
   7: 'ExtensionSubstitution',
   8: 'ReverseChainingContextSingle'
 }
+
+# Calculate the length of ValueRecord in bytes
+valueFormatLength = (valueFormat) ->
+    length = (valueFormat & 0x0001) / 0x0001 +
+              (valueFormat & 0x0002) / 0x0002 +
+              (valueFormat & 0x0004) / 0x0004 +
+              (valueFormat & 0x0008) / 0x0008 +
+              (valueFormat & 0x0010) / 0x0010 +
+              (valueFormat & 0x0020) / 0x0020 +
+              (valueFormat & 0x0040) / 0x0040 +
+              (valueFormat & 0x0080) / 0x0080
+    # return
+    length
     
 # ## Script List Table
 class ScriptListTable
@@ -388,14 +401,7 @@ class SingleAdjustment
     valueFormat = view.getUshort()
     singleAdjustment.valueFormat = valueFormat
     
-    formats = (valueFormat & 0x0001) / 0x0001 +
-              (valueFormat & 0x0002) / 0x0002 +
-              (valueFormat & 0x0004) / 0x0004 +
-              (valueFormat & 0x0008) / 0x0008 +
-              (valueFormat & 0x0010) / 0x0010 +
-              (valueFormat & 0x0020) / 0x0020 +
-              (valueFormat & 0x0040) / 0x0040 +
-              (valueFormat & 0x0080) / 0x0080
+    formats = valueFormatLength(valueFormat)
     
     if posFormat is 1
       value = ValueRecord.createFromTTFDataView(view, offset + 6, valueFormat)
@@ -420,7 +426,131 @@ class SingleAdjustment
     # @return {SingleAdjustment}
     # TODO
 
-# ## GPOS Pairadjustment
+# ## GPOS PairAdjustment
+class PairAdjustment
+  constructor: () ->
+    @posFormat = 1
+  
+  # Create Pairadjustment instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {Pairadjustment}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    pairAdjustment = new PairAdjustment()
+    
+    pairAdjustment.posFormat = posFormat = view.getUshort()
+    
+    if posFormat is 1
+      coverageOffset = view.getUshort()
+      pairAdjustment.valueFormat1 = valueFormat1 = view.getUshort()
+      pairAdjustment.valueFormat2 = valueFormat2 = view.getUshort()
+      pairAdjustment.pairSetCount = pairSetCount = view.getUshort()
+      
+      coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+      pairAdjustment.coverage = coverage
+      
+      if pairSetCount > 0
+        pairSets = []
+        for i in [0..pairSetCount-1]
+          view.seek (offset + 10 + i*2)
+          
+          pairSetOffset = view.getUshort()
+          pairSet = PairSet.createFromTTFDataView(view, offset + pairSetOffset, valueFormat1, valueFormat2)
+          pairSets.push pairSet
+        
+        pairAdjustment.pairSets = pairSets
+      
+    if posFormat is 2
+      coverageOffset = view.getUshort()
+      pairAdjustment.valueFormat1 = valueFormat1 = view.getUshort()
+      pairAdjustment.valueFormat2 = valueFormat2 = view.getUshort()
+      classDef1Offset = view.getUshort()
+      classDef2Offset = view.getUshort()
+      pairAdjustment.class1Count = class1Count = view.getUshort()
+      pairAdjustment.class2Count = class2Count = view.getUshort()
+      
+      coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+      classDef1 = ClassDefinitionTable.createFromTTFDataView(view, offset + classDef1Offset)
+      classDef2 = ClassDefinitionTable.createFromTTFDataView(view, offset + classDef2Offset)
+      
+      pairAdjustment.coverage = coverage
+      pairAdjustment.classDef1 = classDef1
+      pairAdjustment.classDef2 = classDef2
+      
+      formats1 = valueFormatLength(valueFormat1)
+      formats2 = valueFormatLength(valueFormat2)
+      
+      if class1Count > 0
+
+        class1Records = []
+        for i in [0..class1Count-1]
+          value1 = ValueRecord.createFromTTFDataView(view, offset + 16 + i*2*formats1 + i*2*formats2, valueFormat1)
+          value2 = ValueRecord.createFromTTFDataView(view, offset + 16 + (i+1)*2*formats1 + i*2*formats2, valueFormat2)
+        
+    
+    # return
+    pairAdjustment
+
+# ## PairSet
+class PairSet
+  constructor: () ->
+    @pairValueCount = 0
+  
+  # Create PairSet instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {PairSet}
+  @createFromTTFDataView: (view, offset, valueFormat1, valueFormat2) ->
+    view.seek offset
+    
+    pairSet = new PairSet()
+    
+    pairSet.pairValueCount = pairValueCount = view.getUshort()
+    
+    formats1 = (valueFormat1 & 0x0001) / 0x0001 +
+               (valueFormat1 & 0x0002) / 0x0002 +
+               (valueFormat1 & 0x0004) / 0x0004 +
+               (valueFormat1 & 0x0008) / 0x0008 +
+               (valueFormat1 & 0x0010) / 0x0010 +
+               (valueFormat1 & 0x0020) / 0x0020 +
+               (valueFormat1 & 0x0040) / 0x0040 +
+               (valueFormat1 & 0x0080) / 0x0080
+    formats2 = (valueFormat1 & 0x0001) / 0x0001 +
+               (valueFormat1 & 0x0002) / 0x0002 +
+               (valueFormat1 & 0x0004) / 0x0004 +
+               (valueFormat1 & 0x0008) / 0x0008 +
+               (valueFormat1 & 0x0010) / 0x0010 +
+               (valueFormat1 & 0x0020) / 0x0020 +
+               (valueFormat1 & 0x0040) / 0x0040 +
+               (valueFormat1 & 0x0080) / 0x0080
+               
+    if pairValueCount > 0
+      pairValues = []
+      for i in [0..pairValueCount-1]
+        view.seek (offset + 2 + i*2*formats1 + i*2*formats2)
+        
+        secondGlyph = view.getUshort()
+        
+        value1 = ValueRecord.createFromTTFDataView(view, offset + 4 + i*2*formats1 + i*2*formats2, valueFormat1)
+        value2 = ValueRecord.createFromTTFDataView(view, offset + 4 + (i+1)*2*formats1 + i*2*formats2, valueFormat2)
+        
+        pairValue = {
+          secondGlyph: secondGlyph
+        }
+        
+        if valueFormat1
+          pairValue.value1 = value1
+        if valueFormat2
+          pairValue.value2 = value2
+        
+        pairValues.push pairValue
+      
+      pairSet.pairValues = pairValues
+    
+    # return
+    pairSet
 
 # ## GPOS CursiveAttachment
 class CursiveAttachment
