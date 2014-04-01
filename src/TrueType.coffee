@@ -265,7 +265,6 @@ class TrueType
         # GPOS
         if typeof json.GPOS isnt 'undefined'
           ttf.GPOS = GPOSTable.createFromJSON(json.GPOS)
-          console.log ttf.GPOS
 
     # return ttf
     ttf
