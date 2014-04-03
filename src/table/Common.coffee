@@ -15,7 +15,7 @@ GPOSLookupType = {
   5: 'MarkToLigatureAttachment',
   6: 'MarkToMarkAttachment',
   7: 'ContextPositioning',
-  8: 'ChainedContextPositioning',
+  8: 'ChainContextPositioning',
   9: 'ExtensionPositioning'
 }
 GSUBLookupType = {
@@ -376,7 +376,7 @@ class LookupTable
     # @return {LookupTable}
     # TODO
 
-# ## GPOS SingleAdjustment
+# ## GPOS SingleAdjustment, Lookup Type 1
 class SingleAdjustment
   constructor: () ->
     @posFormat = null
@@ -425,7 +425,7 @@ class SingleAdjustment
     # @return {SingleAdjustment}
     # TODO
 
-# ## GPOS PairAdjustment
+# ## GPOS PairAdjustment, Lookup Type 2
 class PairAdjustment
   constructor: () ->
     @posFormat = 1
@@ -492,6 +492,11 @@ class PairAdjustment
     # return
     pairAdjustment
 
+    # Create PairAdjustment from JSON
+    # @param {Object|String} json
+    # @return {PairAdjustment}
+    # TODO
+    
 # ## PairSet
 class PairSet
   constructor: () ->
@@ -551,7 +556,12 @@ class PairSet
     # return
     pairSet
 
-# ## GPOS CursiveAttachment
+    # Create PairSet from JSON
+    # @param {Object|String} json
+    # @return {PairSet}
+    # TODO
+
+# ## GPOS CursiveAttachment, Lookup Type 3
 class CursiveAttachment
   constructor: () ->
     @posFormat = 1
@@ -597,7 +607,7 @@ class CursiveAttachment
     # @return {CursiveAttachment}
     # TODO
     
-# ## GPOS MarkToBaseAttachment
+# ## GPOS MarkToBaseAttachment, Lookup Type 4
 class MarkToBaseAttachment
   constructor: () ->
     @posFormat = 1
@@ -635,9 +645,111 @@ class MarkToBaseAttachment
     # @return {MarkToBaseAttachment}
     # TODO
 
-# ## GPOS MarkToLigatureAttachment
+# ## GPOS MarkToLigatureAttachment, Lookup Type 5
+class MarkToLigatureAttachment
+  constructor: () ->
+  
+  # Create MarkToLigatureAttachment instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {MarkToLigatureAttachment}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    markToLigatureAttachment = new MarkToLigatureAttachment()
+    
+    markToLigatureAttachment.posFormat = posFormat = view.getUshort()
+    markCoverageOffset = view.getUshort()
+    ligatureCoverageOffset = view.getUshort()
+    markToLigatureAttachment.classCount = classCount = view.getUshort()
+    markArrayOffset = view.getUshort()
+    ligatureArrayOffset = view.getUshort()
+    
+    markCoverage = CoverageTable.createFromTTFDataView(view, offset + markCoverageOffset)
+    ligatureCoverage = CoverageTable.createFromTTFDataView(view, offset + ligatureCoverageOffset)
+    
+    markArray = MarkArray.createFromTTFDataView(view, offset + markArrayOffset)
+    ligatureArray = LigatureArray.createFromTTFDataView(view, offset + ligatureArrayOffset, classCount)
+    
+    # return
+    markToLigatureAttachment
 
-# ## GPOS MarkToMarkAttachment
+    # Create MarkToLigatureAttachment from JSON
+    # @param {Object|String} json
+    # @return {MarkToLigatureAttachment}
+    # TODO
+        
+# ## LigatureArray
+class LigatureArray
+  constructor: () ->
+    
+  # Create LigatureArray instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @param {Number} classCount
+  # @return {LigatureArray}
+  @createFromTTFDataView: (view, offset, classCount) ->
+    view.seek offset
+    
+    ligatureArray = new LigatureArray()
+    ligatureArray.ligatureCount = ligatureCount = view.getUshort()
+    
+    if ligatureCount > 0
+      ligatureAttachs = []
+      for i in [0..ligatureCount-1]
+        ligatureAttachOffset = view.getUshort()
+        
+        ligatureAttach = LigatureAttach.createFromTTFDataView(view, offset + ligatureAttachOffset, classCount)
+        ligatureAttachs.push ligatureAttach
+      ligatureArray.ligatureAttachs = ligatureAttachs
+    
+    # return
+    ligatureArray
+
+
+# ## LigatureAttach
+class LigatureAttach
+  constructor: () ->
+  
+  # Create LigatureAttach instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @param {Number} classCount
+  # @return {LigatureAttach}
+  @createFromTTFDataView: (view, offset, classCount) ->
+    view.seek offset
+    
+    ligatureAttach = new LigatureAttach()
+    
+    ligatureAttach.componentCount = componentCount = view.getUshort()
+    if componentCount > 0
+      componentRecords = []
+      
+      for i in [0..componentCount-1]
+        if classCount > 0
+          componentRecord = []
+          
+          for j in [0..classCount-1]
+            view.seek (offset + 2 + i*2*classCount + j*2)
+              
+            ligatureAnchorOffset = view.getUshort()
+            
+            ligatureAnchor = AnchorTable.createFromTTFDataView(view, offset + ligatureAnchorOffset)
+            componentRecord.push ligatureAnchor
+        
+          componentRecords.push componentRecord
+          
+    ligatureAttach.componentRecords = componentRecords
+    
+    # return
+    ligatureAttach
+
+    # Create LigatureAttach from JSON
+    # @param {Object|String} json
+    # @return {LigatureAttach}
+    # TODO
+
+# ## GPOS MarkToMarkAttachment, Lookup Type 6
 class MarkToMarkAttachment
   constructor: () ->
     @posFormat = 1
@@ -661,7 +773,7 @@ class MarkToMarkAttachment
     mark1Coverage = CoverageTable.createFromTTFDataView(view, offset + mark1CoverageOffset)
     mark2Coverage = CoverageTable.createFromTTFDataView(view, offset + mark2CoverageOffset)
     mark1Array = MarkArray.createFromTTFDataView(view, offset + mark1ArrayOffset)
-    mark2Array = MarkArray.createFromTTFDataView(view, offset + mark2ArrayOffset)
+    mark2Array = Mark2Array.createFromTTFDataView(view, offset + mark2ArrayOffset)
     
     markToMarkAttachment.mark1Coverage = mark1Coverage
     markToMarkAttachment.mark2Coverage = mark2Coverage
@@ -675,12 +787,278 @@ class MarkToMarkAttachment
     # @param {Object|String} json
     # @return {MarkToMarkAttachment}
     # TODO
+
+# ## GPOS Mark2Array (same as GPOS BaseArray)
+class Mark2Array
+  constructor: () ->
+    @baseCount = 0
     
-# ## GPOS ContextPositioning
+  # Create Mark2Array instance from TTFDataview
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {Mark2Array}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+  
+    mark2Array = new Mark2Array()
+    mark2Array.mark2Count = mark2Count = view.getUshort()
+    
+    if mark2Count > 0
+      mark2Records = []
+      for i in [0..mark2Count-1]
+        view.seek (offset + 2 + i*2)
+        mark2AnchorOffset = view.getUshort()
+        mark2Anchor = AnchorTable.createFromTTFDataView(view, offset + baseAnchorOffset)
+        
+        mark2Record = {
+          mark2Anchor: mark2anchor
+        }
+        mark2Records.push mark2Record
+    
+    mark2Array.mark2Records = mark2Records
 
-# ## GPOS ChainedContextPositioning
+    # return
+    mark2Array
+    
+    # Create Mark2Array from JSON
+    # @param {Object|String} json
+    # @return {Mark2Array}
+    # TODO
 
-# ## GPOS ExtensionPositioning
+class Mark2Array
+  constructor: () ->
+
+  # Create Mark2Array instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {Mark2Array}  
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    mark2Array = new Mark2Array
+    
+    mark2AnchorOffset = view.getUshort()
+    
+# ## GPOS ContextPositioning, Lookup Type 7
+
+# ## GPOS ChainContextPositioning, Lookup Type 8
+class ChainContextPositioning
+  constructor: () ->
+    
+  # Create ChainContextPositioning instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {ChainContextPositioning}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    chainContextPositioning = new ChainContextPositioning()
+    
+    chainContextPositioning.posFormat = posFormat = view.getUshort()
+    
+    if posFormat is 1
+      coverageOffset = view.getUshort()
+      chainContextPositioning.chainPosRuleSetCount = chainPosRuleSetCount = view.getUshort()
+      
+      coverage = CoverageTable.createTTFFromDataView(view, coverageOffset)
+      
+      if chainPosRuleSetCount > 0
+        chainPosRuleSets = []
+        for i in [0..chainPosRuleSetCount-1]
+          view.seek (offset + 6 + i*2)
+          chainPosRuleSetOffset = view.getUshort()
+          
+          view.seek (offset + chainPosRuleSetOffset)
+          
+          chainPosRuleCount = view.getUshort()
+          
+          if chainPosRuleCount > 0
+            chainPosRules = []
+            for j in [0..chainPosRuleCount-1]
+              view.seek (offset + chainPosRuleSetOffset + 2 + j*2)
+              chainPosRuleOffset = view.getUshort()
+              
+              chainPosRule = ChainPosRule.createFromTTFDataView(view, offset + chainPosRuleOffset)
+              
+              chainPosRules.push chainPosRule
+          
+          chainPosRuleSet = {
+            chainPosRuleCount: chainPosRuleCount,
+            chainPosRules: chainePosRules
+          }
+          
+          chainPosRuleSets.push chainPosRuleSet
+      
+        chainContextPositioning.chainPosRuleSets = chainPosRuleSets
+      
+      if posFormat is 2
+        coverageOffset = view.getUshort()
+        backtrackClassDefOffset = view.getUshort()
+        inputClassDefOffset = view.getUshort()
+        lookAheadClassDefOffset = view.getUshort()
+        chainContextPositioning.chainPosClassSetCount = chainPosClassSetcount = view.getUshort()
+        
+        if chainPosClassSetcount > 0
+          chainPosClassSets = []
+          for i in [0..chainPosClassSetcount-1]
+            view.seek (offset + 12 + i*2)
+            chainPosClassSetOffset = view.getUshort()
+            
+            chainPosClassSet = ChainPosClassSet.createFromTTFDataView(view, offset + chainPosClassSetOffset)
+                          
+          
+          
+        
+        chainContextPositioning.coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+        chainContextPositioning.backtrackClassDef = ClassDefinitionTable(view, offset + backtrackClassDefOffset)
+        chainContextPositioning.inputClassDef = ClassDefinitionTable(view, offset + inputClassDefOffset)
+        
+    
+    # return
+    chainContextPositioning
+
+# ## ChainPosRule
+class ChainPosRule
+  constructor: () ->
+  
+  # Create ChainPosRule instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {ChainPosRule}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    chainPosRule = new ChainPosRule()
+    
+    chainPosRule.backtrackGlyphCount = backtrackGlyphCount = view.getUshort()
+    
+    if backtrackGlyphCount > 0
+      backtracks = []
+      for i in [0..backtrackGlyphCount-1]
+        backtrack = view.getUshort()
+        backtracks.push backtrack
+      chainPosRule.backtracks = backtracks
+    
+    chainPosRule.inputGlyphCount = inputGlyphCount = view.getUshort()
+    
+    if inputGlyphCount-1 > 0
+      inputs = []
+      for i in [0..inputGlyphCount-2]
+        input = view.getUshort()
+        inputs.push input
+      chainPosRule.inputs = inputs
+    
+    chainPosRule.lookAheadGlyphCount = lookAheadGlyphCount = view.getUshort()
+    
+    if lookAheadGlyphCount > 0
+      lookAheads = []
+      for i in [0..lookAheadGlyphCount-1]
+        lookAhead= view.getUshort()
+        lookAheads.push lookAhead
+      chainPosRule.lookAheads = lookAheads
+    
+    chainPosRule.posCount = posCount = view.getUshort()
+    
+    if posCount  > 0
+      posLookupRecords = []
+      for i in [0..posCount -1]
+        sequenceIndex = view.getUshort()
+        lookupIndex = view.getUshort()
+        posLookupRecord= {
+          sequenceIndex: sequenceIndex,
+          lookupIndex: lookupIndex
+        }
+        posLookupRecords.push posLookupRecord
+      chainPosRule.posLookupRecords = posLookupRecords
+  
+    # return
+    chainPosRule
+
+# ## ChainPosClassSet
+class ChainPosClassSet
+  constructor: () ->
+  
+  # Create ChainPosClassSet instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {ChainPosClassSet}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    chainPosClassSet = new ChainPosClassSet()
+    
+    chainPosClassRuleCount = view.getUshort()
+            
+    if chainPosClassRuleCount > 0
+      chainPosClassRules = []
+      for i in [0..chainPosClassRuleCount]
+        view.seek (offset + 2 + 2*i)
+        chainPosClassRuleOffset = view.getUshort()
+        chainPosClassRule = ChainPosClassRule.createFromTTFDataView(view, offset + chainPosClassRuleOffset)
+        chainPosClassRules.push chainPosClassRule
+      chainPosClassSet.chainPosClassRules = chainPosClassRules
+    
+    # return
+    chainPosClassSet
+
+# ## ChainPosClassRule
+class ChainPosClassRule
+  constructor: () ->
+
+  # Create ChainPosClassRule instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {ChainPosClassRule}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    chainPosClassRule = new ChainPosClassRule()
+    
+    chainPosClassRule.backtrackGlyphCount = backtrackGlyphCount = view.getUshort()
+    
+    if backtrackGlyphCount > 0
+      backtracks = []
+      for i in [0..backtrackGlyphCount-1]
+        backtrack = view.getUshort()
+        backtracks.push backtrack
+      chainPosClassRule.backtracks = backtracks
+    
+    chainPosClassRule.inputGlyphCount = inputGlyphCount = view.getUshort()
+    
+    if inputGlyphCount > 0
+      inputs = []
+      for i in [0..inputGlyphCount-2]
+        input = view.getUshort()
+        inputs.push input
+      chainPosClassRule.inputs = inputs
+    
+    chainPosClassRule.lookAheadGlyphCount = lookAheadGlyphCount = view.getUshort()
+    
+    if lookAheadGlyphCount > 0
+      lookAheads = []
+      for i in [0..lookAheadGlyphCount-1]
+        lookAhead = view.getUshort()
+        lookAheads.push lookAhead
+      chainPosClassRule.lookAheads = lookAheads
+    
+    chainPosClassRule.posCount = posCount = view.getUshort()
+    
+    if posCount  > 0
+      posLookupRecords = []
+      for i in [0..posCount -1]
+        sequenceIndex = view.getUshort()
+        lookupIndex = view.getUshort()
+        posLookupRecord= {
+          sequenceIndex: sequenceIndex,
+          lookupIndex: lookupIndex
+        }
+        posLookupRecords.push posLookupRecord
+      chainPosClassRule.posLookupRecords = posLookupRecords  
+    
+    # return
+    chainPosClassRule
+
+# ## GPOS ExtensionPositioning, Lookup Type 9
 class ExtensionPositioning
   constructor: () ->
   
@@ -697,6 +1075,9 @@ class ExtensionPositioning
     extensionPositioning.extensionLookupType = view.getUshort()
     # must be se to lookup type other than 9
     extensionOffset = view.getUlong()
+    
+    extension = Extension.createFromTTFDataView(view, offset)
+    # TODO
     
     # return
     extensionPositioning
