@@ -704,14 +704,12 @@ class LigatureArray
     
     ligatureArray = new LigatureArray()
     ligatureArray.ligatureCount = ligatureCount = view.getUshort()
-    console.log "ligatureCount: " + ligatureCount
     
     if ligatureCount > 0
       ligatureAttachs = []
       for i in [0..ligatureCount-1]
         view.seek (offset + 2 + i*2)
         ligatureAttachOffset = view.getUshort()
-        console.log "ligatureAttachOffset: " + ligatureAttachOffset
         
         ligatureAttach = LigatureAttach.createFromTTFDataView(view, offset + ligatureAttachOffset, classCount)
         ligatureAttachs.push ligatureAttach
