@@ -355,13 +355,9 @@ class LookupTable
         
         subTableOffset = view.getUshort()
         
-        if tableType is "GPOS"
-          subTable = null
-          # Get LookupType class from GPOSLookupType
-          lookupTypeString = tableType + "LookupType[" + lookupTable.lookupType + "]"
-          lookupTypeClass = eval lookupTypeString
-          eval "subTable = " + lookupTypeClass + ".createFromTTFDataView(view, offset + subTableOffset)"
-          subTables.push subTable
+        subTable = Lookup.createFromTTFDataView(view, offset + subTableOffset, tableType, lookupTable.lookupType)
+        
+        subTables.push subTable
       lookupTable.subTables = subTables
     
     if (lookupTable.lookupFlag & 0x0010)
@@ -376,6 +372,21 @@ class LookupTable
     # @return {LookupTable}
     # TODO
 
+# ## Lookup
+class Lookup
+  constructor: () ->
+    
+  @createFromTTFDataView: (view, offset, tableType, lookupType) ->
+
+    subTable = null
+    # Get LookupType class from tableType (GSUB or GPOS) + LookupType
+    lookupTypeString = tableType + "LookupType[" + lookupType + "]"
+    lookupTypeClass = eval lookupTypeString
+    subTable = eval "subTable = " + lookupTypeClass + ".createFromTTFDataView(view, offset)"
+    
+    # return
+    subTable
+          
 # ## GPOS SingleAdjustment, Lookup Type 1
 class SingleAdjustment
   constructor: () ->
@@ -693,11 +704,14 @@ class LigatureArray
     
     ligatureArray = new LigatureArray()
     ligatureArray.ligatureCount = ligatureCount = view.getUshort()
+    console.log "ligatureCount: " + ligatureCount
     
     if ligatureCount > 0
       ligatureAttachs = []
       for i in [0..ligatureCount-1]
+        view.seek (offset + 2 + i*2)
         ligatureAttachOffset = view.getUshort()
+        console.log "ligatureAttachOffset: " + ligatureAttachOffset
         
         ligatureAttach = LigatureAttach.createFromTTFDataView(view, offset + ligatureAttachOffset, classCount)
         ligatureAttachs.push ligatureAttach
@@ -860,7 +874,7 @@ class ChainContextPositioning
       coverageOffset = view.getUshort()
       chainContextPositioning.chainPosRuleSetCount = chainPosRuleSetCount = view.getUshort()
       
-      coverage = CoverageTable.createTTFFromDataView(view, coverageOffset)
+      coverage = CoverageTable.createFromTTFDataView(view, coverageOffset)
       
       if chainPosRuleSetCount > 0
         chainPosRuleSets = []
@@ -1072,12 +1086,13 @@ class ExtensionPositioning
     extensionPositioning = new ExtensionPositioning()
     
     extensionPositioning.posFormat = view.getUshort()
-    extensionPositioning.extensionLookupType = view.getUshort()
+    extensionPositioning.extensionLookupType = extensionLookupType = view.getUshort()
     # must be se to lookup type other than 9
     extensionOffset = view.getUlong()
     
-    extension = Extension.createFromTTFDataView(view, offset)
-    # TODO
+    extension = Lookup.createFromTTFDataView(view, offset + extensionOffset, "GPOS", extensionLookupType)
+    
+    extensionPositioning.extension = extension
     
     # return
     extensionPositioning
