@@ -124,16 +124,17 @@ class LigCaretListTable
     view.seek (offset + 2)
     ligCaretList.coverage = coverage
     ligCaretList.ligGlyphCount = ligGlyphCount = view.getUshort()
-    
-    ligGlyph = []
+
     if ligGlyphCount > 0
+      ligGlyph = Array ligGlyphCount
       for i in [0..ligGlyphCount]
         caretCount = view.getUshort()
         caretValueOffset = view.getUshort()
         caretValue = CaretValueTable.createFromTTFDataView(view, offset + caretValueOffset)
-        ligGlyph.push {
-          'caretCount': caretCount
+        ligGlyph[i] = {
+          caretCount: caretCount
         }
+      ligCareList.ligGlyph = ligGlyph
     
     # return
     ligCaretList
@@ -216,15 +217,15 @@ class MarkGlyphSetsDef
     markGlyphSetsDef.format = format = view.getUshort()
     markGlyphSetsDef.markSetCount = markSetCount = view.getUshort()
     
-    coverages = []
     if markSetCount > 0
+      coverages = Array markSetCount
       for i in [0..markSetCount-1]
         coverageOffset = view.getUlong()
         coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
-        coverages.push coverage
+        coverages[i] = coverage
         view.seek (offset + 4 + i*4)
     
-    markGlyphSetsDef.coverages = coverages
+      markGlyphSetsDef.coverages = coverages
     
     # return
     markGlyphSetsDef
@@ -240,11 +241,11 @@ class MarkGlyphSetsDef
     markGlyphSetsDef.format = json.format
     markGlyphSetsDef.markSetCount = markSetCount = json.markSetCount
     
-    coverages = []
     if markSetCount > 0
+      coverages = Array markSetCount
       for i in [0..markSetCount-1]
         coverage = CoverageTable.createFromJSON(json.coverages[i])
-        coverages.push coverage
+        coverages[i] = coverage
     markGlyphSetsDef.coverages = coverages
     
     # return

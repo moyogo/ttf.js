@@ -1,5 +1,6 @@
 # # ttf.js - JavaScript TrueType Font library
 #
+# Copyright (C) 2014 by ynakajima (https://github.com/ynakajima)
 # Copyright (C) 2014 by Daton Maag Ltd.
 #
 # Released under the MIT license.

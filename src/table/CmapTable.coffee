@@ -58,8 +58,8 @@ class CmapTable
     
     cmap.tableVersion = json.tableVersion
     
-    for table in json.tables
-      cmap.tables.push(CmapSubTable.createFromJSON(table))
+    for i in [0..json.tables.length]
+      cmap.tables[i] = CmapSubTable.createFromJSON(json.tables[i])
     
     # return cmap
     cmap
@@ -106,7 +106,7 @@ class CmapSubTable
           code: '0x' + i.toString(16)
           gId: glyphId
         }
-        mapping.push map
+        mapping.push = map
     
     # format 2
     if subTable.format is 2
@@ -166,21 +166,24 @@ class CmapSubTable
       searchRange = view.getUshort()
       entrySelector = view.getUshort()
       rangeShift = view.getUshort()
-      endCount = []
-      for i in [0..segCount-1]
-        endCount.push view.getUshort()
-      reservePad = view.getUshort()
-      startCount = []
-      for i in [0..segCount-1]
-        startCount.push view.getUshort()
-      idDelta = []
-      for i in [0..segCount-1]
-        idDelta.push view.getShort()
-      idRangeOffset = []
-      for i in [0..segCount-1]
-        idRangeOffset.push view.getUshort()
       
-      mapping= []
+      endCount = Array segCount
+      for i in [0..segCount-1]
+        endCount[i] = view.getUshort()
+      
+      reservePad = view.getUshort()
+      
+      startCount = Array segCount
+      for i in [0..segCount-1]
+        startCount[i] = view.getUshort()
+      
+      idDelta = Array segCount
+      for i in [0..segCount-1]
+        idDelta[i] = view.getShort()
+      
+      idRangeOffset = Array segCount
+      for i in [0..segCount-1]
+        idRangeOffset[i] = view.getUshort()
       
       for i in [0..segCount-1]
         for j in [0..(endCount[i] - startCount[i])]
@@ -211,9 +214,10 @@ class CmapSubTable
       reserved = view.getUshort()
       length = view.getUlong()
       subTable.language = view.getUlong()
-      is32 = []
+      is32 = Array 8192
       for i in [0..8191]
-        is32.push view.getByte()
+        is32[i] view.getByte()
+      
       nGroups = view.getUlong()
       
       for i in [0..nGroups]
@@ -286,7 +290,7 @@ class CmapSubTable
     if subTable.format is 14
       length = view.getUlong()
       numVarSelectorRecords = view.getUlong()
-      varSelectorRecords = []
+      varSelectorRecords = Array numVarSelectorRecords
       
       for i in [0..numVarSelectorRecords-1]
         currentOffset = offset + 2+4+4
@@ -322,7 +326,7 @@ class CmapSubTable
         
         view.seek currentOffset
         
-        varSelectorRecords.push unicodeValueRanges
+        varSelectorRecords[i] = unicodeValueRanges
 
       mapping = varSelectorRecords
     
