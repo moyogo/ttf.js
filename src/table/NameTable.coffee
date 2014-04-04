@@ -25,7 +25,7 @@ class NameTable
     name.count = view.getUshort()
     stringOffset = view.getUshort()
     
-    nameRecords = []
+    nameRecords = Array name.count
     for i in [0..name.count-1]
       currentOffset = offset + 6 + i*12
       view.seek currentOffset
@@ -51,7 +51,7 @@ class NameTable
       
       nameRecord.string = string
       
-      nameRecords.push nameRecord
+      nameRecords[i] = nameRecord
     
     name.nameRecords = nameRecords
     
