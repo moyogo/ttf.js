@@ -45,8 +45,6 @@ valueFormatLength = (valueFormat) ->
 # ## Script List Table
 class ScriptListTable
   constructor: () ->
-    @scriptCount = 0
-    @scriptRecord = []
   
   # Create ScriptListTable instance from TTFDataView
   # @param {TTFDataView} view
@@ -59,13 +57,13 @@ class ScriptListTable
     
     scriptListTable.scriptCount = scriptCount = view.getUshort()
     if scriptCount > 0
-      scriptRecord = []
+      scriptRecord = Array scriptCount
       for i in [0..scriptCount-1]
         view.seek (offset + 2 + i*6)
         scriptTag = view.getString 4
         scriptOffset = view.getUshort()
         scriptTable = ScriptTable.createFromTTFDataView(view, offset + scriptOffset)
-        scriptRecord.push {
+        scriptRecord[i] = {
           scriptTag: scriptTag
           script: scriptTable
         }
@@ -86,8 +84,9 @@ class ScriptListTable
     
     scriptListTable.scriptCount = json.scriptCount
     
-    for scriptRecord in json.scriptRecord
-      scriptListTable.scriptRecord.push {
+    for i in [0..json.scriptRecordlength]
+      scriptListTable.scriptRecord = Array json.scriptRecordlength
+      scriptListTable.scriptRecord[i] = {
         scriptTag: scriptRecord.scriptTag
         script: ScriptTable.createFromJSON(scriptRecord.script)
       }
@@ -114,14 +113,14 @@ class ScriptTable
     scriptTable.langSysCount = langSysCount = view.getUshort()
     
     if langSysCount > 0
-      langSysRecord = []
+      langSysRecord = Array langSysCount
       for i in [0..langSysCount-1]
         view.seek (offset + 4 + i*6)
         
         langSysTag = view.getString 4
         langSysOffset = view.getUshort()
         langSys = LangSys.createFromTTFDataView(view, offset + langSysOffset)
-        langSysRecord.push {
+        langSysRecord[i] = {
           langSysTag: langSysTag,
           langSys: langSys
         }
@@ -169,9 +168,9 @@ class LangSys
     langSys.featureCount = featureCount = view.getUshort()
     
     if featureCount > 0
-      featureIndex = []
+      featureIndex = Array featureCount
       for i in [0..featureCount-1]
-        featureIndex.push view.getUshort()
+        featureIndex[i] = view.getUshort()
       langSys.featureIndex = featureIndex
     # return
     langSys
@@ -211,12 +210,12 @@ class FeatureListTable
     featureListTable.featureCount = featureCount = view.getUshort()
     
     if featureCount > 0
-      featureRecord = []
+      featureRecord = Array featureCount
       for i in [0..featureCount-1]
         view.seek (offset + 2 + 6*i)
         featureTag = view.getString 4
         featureOffset = view.getUshort()
-        featureRecord.push {
+        featureRecord[i] = {
           featureTag: featureTag,
           feature: FeatureTable.createFromTTFDataView(view, offset + featureOffset)
         }
@@ -260,9 +259,9 @@ class FeatureTable
     featureTable.lookupCount = lookupCount = view.getUshort()
     
     if lookupCount > 0
-      lookupListIndex = []
+      lookupListIndex = Array lookupCount
       for i in [0..lookupCount-1]
-        lookupListIndex.push view.getUshort()
+        lookupListIndex[i] = view.getUshort()
       featureTable.lookupListIndex = lookupListIndex
     
     # return
@@ -302,13 +301,13 @@ class LookupListTable
     lookupListTable.lookupCount = lookupCount = view.getUshort()
     
     if lookupCount > 0
-      lookupTables = []
+      lookupTables = Array lookupCount
       for i in [0..lookupCount-1]
         view.seek (offset + 2 + i*2)
         
         lookupOffset = view.getUshort()
         lookupTable = LookupTable.createFromTTFDataView(view, offset + lookupOffset, tableType)
-        lookupTables.push lookupTable
+        lookupTables[i] = lookupTable
       lookupListTable.lookupTables = lookupTables
       
     # return
@@ -348,7 +347,7 @@ class LookupTable
     lookupTable.subTableCount = subTableCount = view.getUshort()
     
     if subTableCount > 0
-      subTables = []
+      subTables = Array subTableCount
       
       for i in [0..subTableCount-1]
         view.seek (offset + 6 + i*2)
@@ -357,7 +356,7 @@ class LookupTable
         
         subTable = Lookup.createFromTTFDataView(view, offset + subTableOffset, tableType, lookupTable.lookupType)
         
-        subTables.push subTable
+        subTables[i] = subTable
       lookupTable.subTables = subTables
     
     if (lookupTable.lookupFlag & 0x0010)
@@ -419,12 +418,12 @@ class SingleAdjustment
     
     if posFormat is 2
       valueCount = view.getUshort()
-      values = []
       
       if valueCount > 0
+        values = Array valueCount
         for i in [0..valueCount-1]
           value = ValueRecord.createFromTTFDataView(view, offset + 8 + i*2*formats, valueFormat)
-          values.push value
+          values[i] = value
     
         singleAdjustment.values = values
     
@@ -462,13 +461,13 @@ class PairAdjustment
       pairAdjustment.coverage = coverage
       
       if pairSetCount > 0
-        pairSets = []
+        pairSets = Array pairSetCount
         for i in [0..pairSetCount-1]
           view.seek (offset + 10 + i*2)
           
           pairSetOffset = view.getUshort()
           pairSet = PairSet.createFromTTFDataView(view, offset + pairSetOffset, valueFormat1, valueFormat2)
-          pairSets.push pairSet
+          pairSets[i] = pairSet
         
         pairAdjustment.pairSets = pairSets
       
@@ -542,7 +541,7 @@ class PairSet
                (valueFormat1 & 0x0080) / 0x0080
                
     if pairValueCount > 0
-      pairValues = []
+      pairValues = Array pairValueCount
       for i in [0..pairValueCount-1]
         view.seek (offset + 2 + i*2*formats1 + i*2*formats2)
         
@@ -560,7 +559,7 @@ class PairSet
         if valueFormat2
           pairValue.value2 = value2
         
-        pairValues.push pairValue
+        pairValues[i] = pairValue
       
       pairSet.pairValues = pairValues
     
@@ -593,7 +592,7 @@ class CursiveAttachment
     cursiveAttachment.coverage = coverage
     
     if entryExitCount > 0
-      entryExitRecords = []
+      entryExitRecords = Array entryExitCount
       for i in [0..entryExitCount-1]
         view.seek (offset + 6 + i*4)
         entryAnchorOffset = view.getUshort()
@@ -607,7 +606,7 @@ class CursiveAttachment
           exitAnchor = AnchorTable.createFromTTFDataView(view, offset + exitAnchorOffset)
           entryExitRecord.exitAnchor = exitAnchor
 
-        entryExitRecords.push entryExitRecord
+        entryExitRecords[i] = entryExitRecord
       cursiveAttachment.entryExitRecords = entryExitRecords
     
     # return 
@@ -706,13 +705,13 @@ class LigatureArray
     ligatureArray.ligatureCount = ligatureCount = view.getUshort()
     
     if ligatureCount > 0
-      ligatureAttachs = []
+      ligatureAttachs = Array ligatureCount
       for i in [0..ligatureCount-1]
         view.seek (offset + 2 + i*2)
         ligatureAttachOffset = view.getUshort()
         
         ligatureAttach = LigatureAttach.createFromTTFDataView(view, offset + ligatureAttachOffset, classCount)
-        ligatureAttachs.push ligatureAttach
+        ligatureAttachs[i] = ligatureAttach
       ligatureArray.ligatureAttachs = ligatureAttachs
     
     # return
@@ -735,11 +734,11 @@ class LigatureAttach
     
     ligatureAttach.componentCount = componentCount = view.getUshort()
     if componentCount > 0
-      componentRecords = []
+      componentRecords = Array componentCount
       
       for i in [0..componentCount-1]
         if classCount > 0
-          componentRecord = []
+          componentRecord = Array classCount
           
           for j in [0..classCount-1]
             view.seek (offset + 2 + i*2*classCount + j*2)
@@ -747,9 +746,9 @@ class LigatureAttach
             ligatureAnchorOffset = view.getUshort()
             
             ligatureAnchor = AnchorTable.createFromTTFDataView(view, offset + ligatureAnchorOffset)
-            componentRecord.push ligatureAnchor
+            componentRecord[j] = ligatureAnchor
         
-          componentRecords.push componentRecord
+          componentRecords[i] = componentRecord
           
     ligatureAttach.componentRecords = componentRecords
     
@@ -816,7 +815,7 @@ class Mark2Array
     mark2Array.mark2Count = mark2Count = view.getUshort()
     
     if mark2Count > 0
-      mark2Records = []
+      mark2Records = Array mark2Count
       for i in [0..mark2Count-1]
         view.seek (offset + 2 + i*2)
         mark2AnchorOffset = view.getUshort()
@@ -825,7 +824,7 @@ class Mark2Array
         mark2Record = {
           mark2Anchor: mark2anchor
         }
-        mark2Records.push mark2Record
+        mark2Records[i] = mark2Record
     
     mark2Array.mark2Records = mark2Records
 
@@ -852,7 +851,195 @@ class Mark2Array
     mark2AnchorOffset = view.getUshort()
     
 # ## GPOS ContextPositioning, Lookup Type 7
+class ContextPositioning
+  constructor: () ->
 
+  # Create ContextPositioning instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {ContextPositioning}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    contextPositioning = new ContextPositioning()
+    
+    contextPositioning.posFormat = posFormat = view.getUshort()
+    
+    if posFormat is 1
+      coverageOffset = view.getUshort()
+      contextPositioning.posRuleSetCount = posRuleSetCount = view.getUshort()
+      
+      coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+      
+      if posRuleSetCount > 0
+        posRuleSets = Array posRuleSetCount
+        for i in [0..posRuleSetCount-1]
+          view.seek (offset + 6 + i*2)
+          
+          posRuleSetOffset = view.getUshort()
+          
+          posRuleSet = PosRuleSet.createFromTTFDataView(view, offset)
+          posRuleSets[i] = posRuleSet
+          
+        contextPositioning.posRuleSets = posRuleSets
+      
+    if posFormat is 2
+      coverageOffset = view.getUshort()
+      classDefOffset = view.getUshort()
+      contextPositioning.posClassSetCount = posClassSetCount = view.getUshort()
+      
+      coverage = CoverageTable.createFromTTFDataView(view, offset + coverageOffset)
+      classDef = ClassDefinitionTable.createFromTTFDataView(view, offset + classDefOffset)
+      
+      if posClassSetCount > 0
+        posClassSets = Array posClassSetCount
+        for i in [0..posClassSetCount-1]
+          view.seek (offset + 8 + i*2)
+          posClassSetOffset = view.getUshort()
+          
+          posClassSet = PosClassSet.createFromTTFDataView(view, offset + posClassSetOffset)
+          
+          posClassSets[i] = posClassSet
+        contextPositioning.posClassSets = posClassSets
+    
+    # return
+    contextPositioning
+
+# ## PosRuleSet
+class PosRuleSet
+  constructor: () ->
+    
+  # Create PosRuleSet instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {PosRuleSet}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    posRuleSet = new PosRuleSet()
+    
+    posRuleSet.posRuleCount = posRuleCount = view.getUshort()
+    
+    if posRuleCount > 0
+      posRules = Array posRuleCount
+      for i in [0..posRuleCount-1]
+        view.seek (offset + 2 + i*2)
+        posRuleOffset = view.getUshort()
+        
+        posRule = PosRule.createFromTTFDataView(view, offset)
+        posRules[i] = posRule
+        
+      posRuleSet.posRules = posRules
+  
+    # return
+    posRuleSet
+
+# ## PosRule
+class PosRule
+  constructor: () ->
+    
+  # Create PosRuleSet instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {PosRuleSet}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    posRule = new PosRule.createFromTTFDataview(view, offset)
+    
+    posRule.glyphCount = glyphCount = view.getUshort()
+    posRule.posCount = posCount = view.getUshort()
+    
+    if glyphCount-1 > 0
+      inputs = Array glyphCount-1
+      for i in [0..glyphCount-2]
+        input = view.getUshort()
+        inputs[i] = input
+      posRule.inputs = inputs
+    
+    if posCount > 0
+      posLookupRecords = Array posCount
+      for i in [0..posCount-1]
+        sequenceIndex = view.getUshort()
+        lookupIndex = view.getUshort()
+        posLookupRecord = {
+          sequenceIndex: sequenceIndex,
+          lookupIndex: lookupIndex
+        }
+        posLookupRecords[i] = posLookupRecord
+      posRule.posLookupRecords = posLookupRecords
+ 
+    # return
+    posRule
+
+# ## PosClassSet
+class PosClassSet
+  constructor: () ->
+
+  # Create PosClassSet instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {PosClassSet}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    posClassSet = new PosClassSet()
+    
+    posClassSet.posClassRuleCount = posClassRuleCount = view.getUshort()
+    
+    if posClassRuleCount > 0
+      posClassRules = Array posClassRuleCount
+      for i in [0..posClassRuleCount-1]
+        view.seek (offset + 2 + i*2)
+        
+        posClassRuleOffset = view.getUshort()
+        
+        posClassRule = PosClassRule.createFromTTFDataView(view, offset + posClassRuleOffset)
+        
+        posClassRules[i] = posClassRule
+      posClassSet.posClassRules = posClassRules
+    
+    # return
+    posClassSet
+    
+# ## PosClassRul
+class PosClassRule
+  constructor: () ->
+
+  # Create PosClassRule instance from TTFDataView
+  # @param {TTFDataView} view
+  # @param {Number} offset
+  # @return {PosClassRule}
+  @createFromTTFDataView: (view, offset) ->
+    view.seek offset
+    
+    posClassRule = new PosClassRule()
+    
+    posClassRule.glyphCount = glyphCount = view.getUshort()
+    posClassRule.posCount = posCount = view.getUshort()
+    
+    if glyphCount-1 > 0
+      posClasses = Array glyphCount-1
+      for i in [0..glyphCount-2]
+        posClass = view.getUshort()
+        posClasses = posClass
+      posClassRule.posClasses = posClasses
+    
+    if posCount > 0
+      posLookupRecords = Array posCount
+      for i in [0..posCount-1]
+        sequenceIndex = view.getUshort()
+        lookupIndex = view.getUshort()
+        posLookupRecord= {
+          sequenceIndex: sequenceIndex,
+          lookupIndex: lookupIndex
+        }
+        posLookupRecords[i] = posLookupRecord
+      posClassRule.posLookupRecords = posLookupRecords
+      
+    # return
+    posClassRule
+    
 # ## GPOS ChainContextPositioning, Lookup Type 8
 class ChainContextPositioning
   constructor: () ->
@@ -875,7 +1062,7 @@ class ChainContextPositioning
       coverage = CoverageTable.createFromTTFDataView(view, coverageOffset)
       
       if chainPosRuleSetCount > 0
-        chainPosRuleSets = []
+        chainPosRuleSets = Array chainPosRuleSetCount
         for i in [0..chainPosRuleSetCount-1]
           view.seek (offset + 6 + i*2)
           chainPosRuleSetOffset = view.getUshort()
@@ -885,21 +1072,21 @@ class ChainContextPositioning
           chainPosRuleCount = view.getUshort()
           
           if chainPosRuleCount > 0
-            chainPosRules = []
+            chainPosRules = Array chainPosRuleCount
             for j in [0..chainPosRuleCount-1]
               view.seek (offset + chainPosRuleSetOffset + 2 + j*2)
               chainPosRuleOffset = view.getUshort()
               
               chainPosRule = ChainPosRule.createFromTTFDataView(view, offset + chainPosRuleOffset)
               
-              chainPosRules.push chainPosRule
+              chainPosRules[j] = chainPosRule
           
           chainPosRuleSet = {
             chainPosRuleCount: chainPosRuleCount,
             chainPosRules: chainePosRules
           }
           
-          chainPosRuleSets.push chainPosRuleSet
+          chainPosRuleSets[i] = chainPosRuleSet
       
         chainContextPositioning.chainPosRuleSets = chainPosRuleSets
       
@@ -945,42 +1132,42 @@ class ChainPosRule
     chainPosRule.backtrackGlyphCount = backtrackGlyphCount = view.getUshort()
     
     if backtrackGlyphCount > 0
-      backtracks = []
+      backtracks = Array backtrackGlyphCount
       for i in [0..backtrackGlyphCount-1]
         backtrack = view.getUshort()
-        backtracks.push backtrack
+        backtracks[i] = backtrack
       chainPosRule.backtracks = backtracks
     
     chainPosRule.inputGlyphCount = inputGlyphCount = view.getUshort()
     
     if inputGlyphCount-1 > 0
-      inputs = []
+      inputs = Array inputGlyphCount-1
       for i in [0..inputGlyphCount-2]
         input = view.getUshort()
-        inputs.push input
+        inputs[i] = input
       chainPosRule.inputs = inputs
     
     chainPosRule.lookAheadGlyphCount = lookAheadGlyphCount = view.getUshort()
     
     if lookAheadGlyphCount > 0
-      lookAheads = []
+      lookAheads = Array lookAheadGlyphCount
       for i in [0..lookAheadGlyphCount-1]
         lookAhead= view.getUshort()
-        lookAheads.push lookAhead
+        lookAheads[i] = lookAhead
       chainPosRule.lookAheads = lookAheads
     
     chainPosRule.posCount = posCount = view.getUshort()
     
     if posCount  > 0
-      posLookupRecords = []
-      for i in [0..posCount -1]
+      posLookupRecords = Array posCount
+      for i in [0..posCount-1]
         sequenceIndex = view.getUshort()
         lookupIndex = view.getUshort()
         posLookupRecord= {
           sequenceIndex: sequenceIndex,
           lookupIndex: lookupIndex
         }
-        posLookupRecords.push posLookupRecord
+        posLookupRecords[i] = posLookupRecord
       chainPosRule.posLookupRecords = posLookupRecords
   
     # return
@@ -1002,12 +1189,12 @@ class ChainPosClassSet
     chainPosClassRuleCount = view.getUshort()
             
     if chainPosClassRuleCount > 0
-      chainPosClassRules = []
-      for i in [0..chainPosClassRuleCount]
+      chainPosClassRules = Array chainPosClassRuleCount
+      for i in [0..chainPosClassRuleCount-1]
         view.seek (offset + 2 + 2*i)
         chainPosClassRuleOffset = view.getUshort()
         chainPosClassRule = ChainPosClassRule.createFromTTFDataView(view, offset + chainPosClassRuleOffset)
-        chainPosClassRules.push chainPosClassRule
+        chainPosClassRules[i] = chainPosClassRule
       chainPosClassSet.chainPosClassRules = chainPosClassRules
     
     # return
@@ -1029,42 +1216,42 @@ class ChainPosClassRule
     chainPosClassRule.backtrackGlyphCount = backtrackGlyphCount = view.getUshort()
     
     if backtrackGlyphCount > 0
-      backtracks = []
+      backtracks = Array backtrackGlyphCount
       for i in [0..backtrackGlyphCount-1]
         backtrack = view.getUshort()
-        backtracks.push backtrack
+        backtracks[i] = backtrack
       chainPosClassRule.backtracks = backtracks
     
     chainPosClassRule.inputGlyphCount = inputGlyphCount = view.getUshort()
     
-    if inputGlyphCount > 0
-      inputs = []
+    if inputGlyphCount-1 > 0
+      inputs = Array inputGlyphCount-1
       for i in [0..inputGlyphCount-2]
         input = view.getUshort()
-        inputs.push input
+        inputs[i] = input
       chainPosClassRule.inputs = inputs
     
     chainPosClassRule.lookAheadGlyphCount = lookAheadGlyphCount = view.getUshort()
     
     if lookAheadGlyphCount > 0
-      lookAheads = []
+      lookAheads = Array lookAheadGlyphCount
       for i in [0..lookAheadGlyphCount-1]
         lookAhead = view.getUshort()
-        lookAheads.push lookAhead
+        lookAheads[i] = lookAhead
       chainPosClassRule.lookAheads = lookAheads
     
     chainPosClassRule.posCount = posCount = view.getUshort()
     
     if posCount  > 0
-      posLookupRecords = []
-      for i in [0..posCount -1]
+      posLookupRecords = Array posCount
+      for i in [0..posCount-1]
         sequenceIndex = view.getUshort()
         lookupIndex = view.getUshort()
         posLookupRecord= {
           sequenceIndex: sequenceIndex,
           lookupIndex: lookupIndex
         }
-        posLookupRecords.push posLookupRecord
+        posLookupRecords[i] = posLookupRecord
       chainPosClassRule.posLookupRecords = posLookupRecords  
     
     # return
@@ -1145,18 +1332,18 @@ class MarkArray
     markArray.markCount = markCount = view.getUshort()
     
     if markCount > 0
-      markRecords = []
+      markRecords = Array markCount
       for i in [0..markCount-1]
         view.seek (offset + 2 + i*4)
         markClass = view.getUshort()
         markAnchorOffset = view.getUshort()
         markAnchor = AnchorTable.createFromTTFDataView(view, offset + markAnchorOffset)
         
-        markRecord = {
+        markRecords[i] = {
           markClass: markClass,
           markAnchor: markAnchor
         }
-        markRecords.push markRecord
+
       markArray.markRecords = markRecords
 
     # return
@@ -1181,7 +1368,7 @@ class BaseArray
     baseArray.baseCount = baseCount = view.getUshort()
     
     if baseCount > 0
-      baseRecords = []
+      baseRecords = Array baseCount
       for i in [0..baseCount-1]
         view.seek (offset + 2 + i*2)
         baseAnchorOffset = view.getUshort()
@@ -1190,7 +1377,7 @@ class BaseArray
         baseRecord = {
           baseAnchor: baseAnchor
         }
-        baseRecords.push baseRecord
+        baseRecords[i] = baseRecord
     
     baseArray.baseRecords = baseRecords
 
@@ -1259,29 +1446,29 @@ class CoverageTable
     
     if coverageFormat is 1
       coverageTable.glyphCount = glyphCount = view.getUshort()
-      glyphArray = []
       
       if glyphCount > 0
+        glyphArray = Array glyphCount
         for i in [0..glyphCount-1]
           glyphId = view.getUshort()
-          glyphArray.push glyphId
-      coverageTable.glyphArray = glyphArray
+          glyphArray[i] = glyphId
+        coverageTable.glyphArray = glyphArray
     
     if coverageFormat is 2
       rangeCount = view.getUshort()
-      rangeRecord = []
 
       if rangeCount > 0
+        rangeRecord = Array rangeCount
         for i in [0..rangeCount-1]
           start = view.getUshort()
           end = view.getUshort()
           startCoverageIndex = view.getUshort()
-          rangeRecord.push {
+          rangeRecord[i] = {
             start: start,
             end: end,
             startCoverageIndex : startCoverageIndex
           }
-      coverageTable.rangeRecord = rangeRecord
+        coverageTable.rangeRecord = rangeRecord
 
     # return
     coverageTable
@@ -1317,19 +1504,19 @@ class ClassDefinitionTable
     classDefTable = new ClassDefinitionTable()
     classDefTable.classFormat = classFormat = view.getUshort()
     
-    classValueArray = []
     if classFormat is 1
       startGlyph = view.getUshort()
       glyphCount = view.getUshort()
-      classValueArray = []
       
       if glyphCount > 0
+        classValueArray = Array glyphCount
         for i in [0..glyphCount-1]
           classId = view.getUshort()
-          classValueArray.push {
+          classValueArray[i] = {
             gId: startGlyph + i,
             class: classId
           }
+        classDefTable.classValueArray = classValueArray
     
     if classFormat is 2
       classRangeCount = view.getUshort()
@@ -1340,12 +1527,14 @@ class ClassDefinitionTable
           start = view.getUshort()
           end = view.getUshort()
           classId = view.getUshort()
-          for j in [start..end]
-            classValueArray.push {
-              gId: j,
+          
+          classValueArray = Array end-start+1
+          for j in [0..end-start+1]
+            classValueArray[j] = {
+              gId: start + j,
               class: classId
             }
-    classDefTable.classValueArray = classValueArray
+        classDefTable.classValueArray = classValueArray
     
     # return
     classDefTable
