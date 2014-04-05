@@ -91,12 +91,12 @@ class PostTable
 
       for i in [0..numGlyphs-1]
         glyphNameId = ""
-        if glyphNameIndex[i] < standardName.length
+        if glyphNameIndex[i] < standardNames.length
           # get default glyph name
           glyphNameId = standardNames[glyphNameIndex[i]]
           name = glyphNameId
         else
-          glyphNameId = glyphNameIndex[i] - standardName.length
+          glyphNameId = glyphNameIndex[i] - standardNames.length
           nameLength = view.getByte()
           name = view.getString nameLength
         names.push {
