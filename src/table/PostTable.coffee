@@ -62,7 +62,7 @@ class PostTable
   @createFromTTFDataView: (view, offset, ttf) ->
     view.seek offset
     post = new PostTable()
-    
+
     post.version = view.getFixed()
     post.italicAngle = view.getFixed()
     post.underlinePosition = view.getFWord()
@@ -72,7 +72,7 @@ class PostTable
     post.maxMemType42 = view.getUlong()
     post.minMemType1 = view.getUlong()
     post.maxMemType1 = view.getUlong()
-    
+
     if post.version is 1
       names = []
       for i in [0..standardNames.length]
@@ -80,23 +80,23 @@ class PostTable
           gId: i,
           name: standardNames[i]
         }
-    
+
     if post.version is 2
       numGlyphs = view.getUshort()
-      
+
       glyphNameIndex = []
       names = []
       for i in [0..numGlyphs-1]
         glyphNameIndex.push view.getUshort()
-      
+
       for i in [0..numGlyphs-1]
         glyphNameId = ""
-        if glyphNameIndex[i] < 257
+        if glyphNameIndex[i] < standardName.length
           # get default glyph name
           glyphNameId = standardNames[glyphNameIndex[i]]
           name = glyphNameId
         else
-          glyphNameId = glyphNameIndex[i] - 258
+          glyphNameId = glyphNameIndex[i] - standardName.length
           nameLength = view.getByte()
           name = view.getString nameLength
         names.push {
@@ -104,18 +104,18 @@ class PostTable
           name: name
           }
       post.names = names
-    
+
     post
-  
+
   # Create PostTable from JSON
   # @param {Object|String} json
   # @return {PostTable}
   @createFromJSON: (json) ->
     if typeof json == 'string'
       json = JSON.parse json
-    
+
     post = new PostTable()
-    
+
     post.version = json.version
     post.italicAngle = json.italicAngle
     post.underlinePosition = json.underlinePosition
@@ -126,9 +126,9 @@ class PostTable
     post.mimMemType1 = json.mimMemType1
     post.maxMemType1 = json.maxMemType1
     post.names = json.names
-    
+
     post
-  
+
   # Return GlyphName at the specified id
   # @param {Number} id id of Glyph
   # @return {String}
