@@ -112,20 +112,28 @@ class ScriptTable
     defaultLangSysOffset = view.getUshort()
     scriptTable.langSysCount = langSysCount = view.getUshort()
     
+    langSysRecord = Array(langSysCount + 1)
+    
+    defaultLangSysRecord = {
+      langSysTag: "dflt",
+      langSys: LangSys.createFromTTFDataView(view, offset + defaultLangSysOffset)
+    }
+    langSysRecord[0] = defaultLangSysRecord
+    
     if langSysCount > 0
-      langSysRecord = Array langSysCount
+      
       for i in [0..langSysCount-1]
         view.seek (offset + 4 + i*6)
         
         langSysTag = view.getString 4
         langSysOffset = view.getUshort()
         langSys = LangSys.createFromTTFDataView(view, offset + langSysOffset)
-        langSysRecord[i] = {
+        langSysRecord[i+1] = {
           langSysTag: langSysTag,
           langSys: langSys
         }
       
-      scriptTable.langSysRecord = langSysRecord
+    scriptTable.langSysRecord = langSysRecord
     
     # return
     scriptTable
