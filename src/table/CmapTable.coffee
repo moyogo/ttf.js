@@ -57,8 +57,8 @@ class CmapTable
     cmap = new CmapTable()
     
     cmap.tableVersion = json.tableVersion
-    
-    for i in [0..json.tables.length]
+
+    for i in [0..json.tables.length-1]
       cmap.tables[i] = CmapSubTable.createFromJSON(json.tables[i])
     
     # return cmap

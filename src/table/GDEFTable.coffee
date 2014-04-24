@@ -134,7 +134,7 @@ class LigCaretListTable
         ligGlyph[i] = {
           caretCount: caretCount
         }
-      ligCareList.ligGlyph = ligGlyph
+      ligCaretList.ligGlyph = ligGlyph
     
     # return
     ligCaretList
@@ -146,8 +146,8 @@ class LigCaretListTable
     if typeof json == 'string'
       json = JSON parse json
     
-    ligCaretList = new LigCareListTable()
-    ligCareList.coverage = CoverageTable.createFromJSON(json.coverage)
+    ligCaretList = new LigCaretListTable()
+    ligCaretList.coverage = CoverageTable.createFromJSON(json.coverage)
     
     # return
     ligCaretList

@@ -556,7 +556,7 @@
       }
       cmap = new CmapTable();
       cmap.tableVersion = json.tableVersion;
-      for (i = _i = 0, _ref = json.tables.length; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      for (i = _i = 0, _ref = json.tables.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         cmap.tables[i] = CmapSubTable.createFromJSON(json.tables[i]);
       }
       return cmap;
@@ -2386,7 +2386,7 @@
             caretCount: caretCount
           };
         }
-        ligCareList.ligGlyph = ligGlyph;
+        ligCaretList.ligGlyph = ligGlyph;
       }
       return ligCaretList;
     };
@@ -2396,8 +2396,8 @@
       if (typeof json === 'string') {
         json = JSON(parse(json));
       }
-      ligCaretList = new LigCareListTable();
-      ligCareList.coverage = CoverageTable.createFromJSON(json.coverage);
+      ligCaretList = new LigCaretListTable();
+      ligCaretList.coverage = CoverageTable.createFromJSON(json.coverage);
       return ligCaretList;
     };
 
