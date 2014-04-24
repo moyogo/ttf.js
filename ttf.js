@@ -929,25 +929,30 @@
     }
 
     ScriptTable.createFromTTFDataView = function(view, offset) {
-      var defaultLangSysOffset, i, langSys, langSysCount, langSysOffset, langSysRecord, langSysTag, scriptTable, _i, _ref;
+      var defaultLangSysOffset, defaultLangSysRecord, i, langSys, langSysCount, langSysOffset, langSysRecord, langSysTag, scriptTable, _i, _ref;
       view.seek(offset);
       scriptTable = new ScriptTable();
       defaultLangSysOffset = view.getUshort();
       scriptTable.langSysCount = langSysCount = view.getUshort();
+      langSysRecord = Array(langSysCount + 1);
+      defaultLangSysRecord = {
+        langSysTag: "dflt",
+        langSys: LangSys.createFromTTFDataView(view, offset + defaultLangSysOffset)
+      };
+      langSysRecord[0] = defaultLangSysRecord;
       if (langSysCount > 0) {
-        langSysRecord = Array(langSysCount);
         for (i = _i = 0, _ref = langSysCount - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           view.seek(offset + 4 + i * 6);
           langSysTag = view.getString(4);
           langSysOffset = view.getUshort();
           langSys = LangSys.createFromTTFDataView(view, offset + langSysOffset);
-          langSysRecord[i] = {
+          langSysRecord[i + 1] = {
             langSysTag: langSysTag,
             langSys: langSys
           };
         }
-        scriptTable.langSysRecord = langSysRecord;
       }
+      scriptTable.langSysRecord = langSysRecord;
       return scriptTable;
     };
 
@@ -2941,7 +2946,7 @@
       name.format = view.getUshort();
       name.count = view.getUshort();
       stringOffset = view.getUshort();
-      nameRecords = [];
+      nameRecords = Array(name.count);
       for (i = _i = 0, _ref = name.count - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         currentOffset = offset + 6 + i * 12;
         view.seek(currentOffset);
@@ -2962,7 +2967,7 @@
           string = view.getString(length, offset + stringOffset + recOffset);
         }
         nameRecord.string = string;
-        nameRecords.push(nameRecord);
+        nameRecords[i] = nameRecord;
       }
       name.nameRecords = nameRecords;
       if (name.format === 1) {
@@ -3830,11 +3835,11 @@
         }
         for (i = _k = 0, _ref2 = numGlyphs - 1; 0 <= _ref2 ? _k <= _ref2 : _k >= _ref2; i = 0 <= _ref2 ? ++_k : --_k) {
           glyphNameId = "";
-          if (glyphNameIndex[i] < 257) {
+          if (glyphNameIndex[i] < standardNames.length) {
             glyphNameId = standardNames[glyphNameIndex[i]];
             name = glyphNameId;
           } else {
-            glyphNameId = glyphNameIndex[i] - 258;
+            glyphNameId = glyphNameIndex[i] - standardNames.length;
             nameLength = view.getByte();
             name = view.getString(nameLength);
           }
